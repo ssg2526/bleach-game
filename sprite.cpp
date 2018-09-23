@@ -3,6 +3,7 @@
 #include <SDL2/SDL_image.h>
 #include <cstring>
 #include <unistd.h>
+#include <math.h>
 #include <stdio.h>
 using namespace std;
 
@@ -25,7 +26,7 @@ class LTexture
 		void free();
 
 		//Renders texture at given point
-		void render( int x, int y, SDL_Rect* clip = NULL );
+		void render( int x, int y, SDL_Rect* clip = NULL, SDL_RendererFlip flipType=SDL_FLIP_NONE );
 
 		//Gets image dimensions
 		int getWidth();
@@ -57,6 +58,7 @@ SDL_Renderer* gRenderer = NULL;
 
 //Scene sprites
 SDL_Rect gSpriteClips[ 4 ];
+SDL_Rect bullet[3];
 LTexture gSpriteSheetTexture;
 
 LTexture::LTexture(){
@@ -132,14 +134,15 @@ bool LTexture::loadFromFile( std::string path )
 	return mTexture != NULL;
 }
 
-void LTexture::render(int x, int y, SDL_Rect* clip){
-	SDL_Rect mySprite = {x, y, mWidth, mHeight};
+void LTexture::render(int x, int y, SDL_Rect* clip, SDL_RendererFlip flipType){
+	//SDL_Rect mySprite = {x, y, mWidth, mHeight};
+	SDL_Rect mySprite = {x, y, 0, 0};
 	if(clip != NULL){
-		mySprite.w = clip->w*2;
-		mySprite.h = clip->h*2;
+		mySprite.w = clip->w;
+		mySprite.h = clip->h;
 	}
 
-	SDL_RenderCopy(gRenderer, mTexture, clip, &mySprite);
+	SDL_RenderCopyEx(gRenderer, mTexture, clip, &mySprite, 0, NULL, flipType);
 }
 
 void LTexture::free(){
@@ -206,25 +209,42 @@ bool loadMedia()
 	}
 	else
 	{
-		gSpriteClips[0].x = 18;
-		gSpriteClips[0].y = 484;
-		gSpriteClips[0].w = 40;
-		gSpriteClips[0].h = 45;
+		gSpriteClips[0].x = 21;
+		gSpriteClips[0].y = 308;
+		gSpriteClips[0].w = 30;
+		gSpriteClips[0].h = 42;
 
-		gSpriteClips[1].x = 59;
-		gSpriteClips[1].y = 485;
-		gSpriteClips[1].w = 40;
-		gSpriteClips[1].h = 45;
+		gSpriteClips[1].x = 54;
+		gSpriteClips[1].y = 308;
+		gSpriteClips[1].w = 30;
+		gSpriteClips[1].h = 42;
 		
-		gSpriteClips[2].x = 103;
-		gSpriteClips[2].y = 482;
-		gSpriteClips[2].w = 40;
-		gSpriteClips[2].h = 45;
+		gSpriteClips[2].x = 86;
+		gSpriteClips[2].y = 308;
+		gSpriteClips[2].w = 30;
+		gSpriteClips[2].h = 42;
 
-		gSpriteClips[3].x = 146;
-		gSpriteClips[3].y = 490;
-		gSpriteClips[3].w = 40;
-		gSpriteClips[3].h = 45;
+		gSpriteClips[3].x = 54;
+		gSpriteClips[3].y = 308;
+		gSpriteClips[3].w = 30;
+		gSpriteClips[3].h = 42;
+
+		bullet[0].x = 347;
+		bullet[0].y = 652;
+		bullet[0].w = 19;
+		bullet[0].h = 22;
+
+
+		bullet[1].x = 370;
+		bullet[1].y = 651;
+		bullet[1].w = 44;
+		bullet[1].h = 37;
+
+
+		bullet[2].x = 422;
+		bullet[2].y = 658;
+		bullet[2].w = 44;
+		bullet[2].h = 23;
 	}
 	return success;
 }
@@ -245,6 +265,20 @@ void close()
 	SDL_Quit();
 }
 
+bool check_collision(SDL_Rect Pbox, SDL_Rect wall){
+	if(abs((Pbox.x+Pbox.w/2) - (wall.x+wall.w/2)) < abs(Pbox.w/2 + wall.w/2)){
+		if(abs((Pbox.y+ Pbox.h/2) - (wall.y+wall.h/2)) < abs(Pbox.h/2 + wall.h/2)){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	else{
+		return false;
+	}
+}
+
 int main(){
 	if(!init()){
 		cout<<"failed to initialize";
@@ -257,37 +291,124 @@ int main(){
 			bool quit = false;
 			SDL_Event e;
 			
-			int i=0;
+			int i=0, k=0, bvel=20, xvel=0, yvel=0 , Pvel=5, flag=0, flipFlag=1;
+			int posX =250, posY = 250, tempx = 250, tempy=250;
+			int bulletPosx = 400;
+			int bulletPosy = 260;
+			SDL_RendererFlip flipType = SDL_FLIP_NONE;
+			SDL_RendererFlip bulletflipType = SDL_FLIP_HORIZONTAL;
+			SDL_Rect wall = {350, 200, 60, 200};
+			SDL_Rect Pbox = {250, 250, 29, 42};
+			bool chk_col;	
 			while(!quit){
+				//vel=0;
 				while(SDL_PollEvent(&e) != 0){
 					if(e.type == SDL_QUIT){
 						quit = true;
 					}
+					else{
+						if(e.type == SDL_KEYDOWN && e.key.repeat==0){
+							switch(e.key.keysym.sym){
+								case SDLK_RIGHT: 
+									xvel += Pvel;
+									if(flipFlag==-1){
+										flipFlag=1;
+										flipType = SDL_FLIP_NONE;
+									}
+								break;
+								case SDLK_LEFT: 
+									xvel -= Pvel;
+									if(flipFlag==1){
+										flipFlag=-1;
+										flipType = SDL_FLIP_HORIZONTAL;
+									}
+								break;
+								case SDLK_UP: 
+									yvel -= Pvel;
+								break;
+								case SDLK_DOWN: 
+									yvel += Pvel;
+								break;
+							}
+						}
+						if(e.type == SDL_KEYUP){
+							switch(e.key.keysym.sym){
+								case SDLK_RIGHT: xvel -= Pvel;break;
+								case SDLK_LEFT: xvel += Pvel;break;
+								case SDLK_UP: yvel += Pvel;break;
+								case SDLK_DOWN: yvel -= Pvel;break;
+							}
+						}
+					}
 				}
-				
+				bulletPosx -= bvel; 
+				tempx = posX; tempy = posY;
+				posX += xvel;
+				posY += yvel;
+				Pbox.x = posX;
+				Pbox.y = posY;
+				chk_col = check_collision(Pbox, wall);
+				if(chk_col){
+					//posX = wall.x - Pbox.w-8;
+					//cout<<tempy+Pbox.h;
+					if(tempy+Pbox.h <= wall.y){
+						posY = wall.y-Pbox.h; 
+					}
+					else{
+						//cout<<tempy+Pbox.h;
+						if(tempy >= wall.y+wall.h){
+							posY = wall.y+wall.h;
+						}
+						else{
+							if(tempx < wall.x){
+								posX = wall.x - Pbox.w;
+							}
+							else{
+								posX = wall.x+wall.w;
+							}
+						}
+					}
+					Pbox.x = posX;
+					Pbox.y = posY;
+				}
+				if(xvel==0){
+					flag=0;
+				}
+				else{
+					flag=1;
+				}
 				SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
 				SDL_RenderClear( gRenderer );
 				
+				SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0xFF );
+				SDL_RenderDrawRect( gRenderer, &wall );
 
-				gSpriteSheetTexture.render( 250, 250, &gSpriteClips[ i ] );
+				SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0xFF );
+				SDL_RenderDrawRect( gRenderer, &Pbox );
+				gSpriteSheetTexture.render( posX, posY, &gSpriteClips[ i ], flipType );
+				gSpriteSheetTexture.render( bulletPosx, bulletPosy, &bullet[ k ], bulletflipType );
 
-				//Render top right sprite
-				//gSpriteSheetTexture.render( 250, 250, &gSpriteClips[ 1 ] );
 
-				//Render bottom left sprite
-				//gSpriteSheetTexture.render( 250, 250, &gSpriteClips[ 2 ] );
-
-				//Render bottom right sprite
-				//gSpriteSheetTexture.render( 250, 250, &gSpriteClips[ 3 ] );
 
 				//Update screen
 				SDL_RenderPresent( gRenderer );
 				usleep(100000);
 				i++;
-				if(i==1){
+				k++;
+				if(flag==0){
+					i=0;
+				}
+				if(i==4){
 					//usleep(3000000);
 					i=0;
-				}		
+				}
+				if(k==3){
+					k=2;
+				}	
+				if(bulletPosx<-50){
+					bulletPosx = 640;
+					k=0;
+				}	
 			}
 		}
 	}
