@@ -1,0 +1,43 @@
+#ifndef PLAYER_H
+#define PLAYER_H
+#include <iostream>
+#include <string.h>
+#include <vector>
+#include "Global.h"
+#include "GameObj.h"
+class Player : public GameObj{
+	public:
+		Player();
+		Player(float x, float y, std::string playername);
+		~Player();
+		bool loadPlayerFromFile(std::string path);
+		void render(float x, float y, SDL_Rect* clip = NULL, SDL_RendererFlip flipType=SDL_FLIP_NONE);
+		int getWidth();
+		int getHeight();
+		void handleMovement(SDL_Event e);
+		void handleMovement(SDL_Event e, int button_released);
+		void updatePos();
+		void playerHitStatic(GameObj object);
+		void free();
+		bool isCollidingBelow;
+		float xPrevPos;
+		float yPrevPos;
+		float maxVel;
+		float jumpVel;
+		float tempJvel;
+		int jumpCount;
+		float xDelPos;
+		float yDelPos;
+		SDL_RendererFlip flipType;
+		vector<SDL_Rect> run;
+		vector<SDL_Rect> jump;
+		SDL_Rect renderingClip;
+		SDL_Rect camera;
+		void initializeClips();
+		void animateRun(bool anim);
+	private:
+		int PlayerSheetWidth;
+		int PlayerSheetHeight;
+		SDL_Texture* PlayerSheetTexture;
+};
+#endif
