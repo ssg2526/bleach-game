@@ -225,7 +225,7 @@ int main(int argc, char* args[]){
 				SDL_RenderClear( gameRenderer );
 				//player.render(player.collisionBox.x, player.collisionBox.y, &run[i/4], player.flipType);
 				camera.x = (player.collisionBox.x+player.collisionBox.w/2)-SCREEN_WIDTH/2;
-				camera.y = (player.collisionBox.y+player.collisionBox.h/2)-SCREEN_HEIGHT/2;
+				camera.y = 0;
 				if( camera.x < 0 )
 				{ 
 					camera.x = 0;
@@ -234,19 +234,18 @@ int main(int argc, char* args[]){
 				{
 					camera.y = 0;
 				}
-				//player.render(0, 0, &camera);
-				player.render(player.collisionBox.x, player.collisionBox.y, &player.renderingClip, player.flipType);
-				e1.render(e1.collisionBox.x, e1.collisionBox.y, &e1.renderingClip, e1.flipType);
+				player.render(player.collisionBox.x - camera.x, player.collisionBox.y - camera.y, &player.renderingClip, player.flipType);
+				
+				e1.render(e1.collisionBox.x - camera.x, e1.collisionBox.y - camera.y, &e1.renderingClip, e1.flipType);
 				
 				SDL_SetRenderDrawColor( gameRenderer, 0x00, 0x00, 0x00, 0xFF );
-				//ground.collisionBox.x = (SCREEN_WIDTH/2-camera.x);
-				SDL_RenderDrawRect( gameRenderer, &ground.collisionBox );
 
-				//SDL_SetRenderDrawColor( gameRenderer, 0x00, 0x00, 0x00, 0xFF );
-				//wall.collisionBox.x = (SCREEN_WIDTH/2-camera.x);
-				SDL_RenderDrawRect( gameRenderer, &wall.collisionBox );
-				SDL_RenderDrawRect( gameRenderer, &e1.collisionBox);
-				SDL_RenderDrawRect( gameRenderer, &player.collisionBox);
+				SDL_Rect grnd = {ground.collisionBox.x-camera.x, ground.collisionBox.y, ground.collisionBox.w, ground.collisionBox.h};
+				SDL_RenderDrawRect( gameRenderer, &grnd );
+
+				SDL_Rect wll = {wall.collisionBox.x-camera.x, wall.collisionBox.y, wall.collisionBox.w, wall.collisionBox.h};
+
+				SDL_RenderDrawRect( gameRenderer, &wll );
 				SDL_RenderPresent( gameRenderer );
 				usleep(SECOND*TIME_STEP);
 			}
