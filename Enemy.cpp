@@ -9,10 +9,6 @@ Enemy::Enemy(){}
 
 Enemy::Enemy(float x, float y, std::string enemyname){
 	initializeClips();
-	loadEnemyFromFile("sprites_folder/enemy.png");
-	EnemySheetTexture = NULL;
-	EnemySheetHeight = 0;
-	EnemySheetWidth = 0;
 	name = enemyname;
 	isCollidingBelow = false;
 	collisionBox.x = x;
@@ -54,22 +50,9 @@ void Enemy::initializeClips(){
 	}
 }
 
-bool Enemy::loadEnemyFromFile(string path){
-	SDL_Texture* newTexture = NULL;
-	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-	SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, 0, 0xFF, 0xFF ) );
-	newTexture = SDL_CreateTextureFromSurface(gameRenderer, loadedSurface);
-	SDL_FreeSurface(loadedSurface);
-	EnemySheetTexture = newTexture;
-	EnemySheetWidth = loadedSurface->w;
-	EnemySheetHeight = loadedSurface->h;
-	newTexture = NULL;
-	//return PlayerSheetTexture!=NULL;
-	return EnemySheetTexture!=NULL;
-}
 
 void Enemy::render(float x, float y, SDL_Rect* clip, SDL_RendererFlip flipType){
-	SDL_Rect spriteRect = {x, y, EnemySheetWidth, EnemySheetHeight};
+	SDL_Rect spriteRect = {(int)x, (int)y, 0, 0};
 	spriteRect.w = clip->w;
 	spriteRect.h = clip->h;
 	SDL_RenderCopyEx(gameRenderer, EnemySheetTexture, clip, &spriteRect, 0, NULL, flipType);
@@ -162,6 +145,4 @@ void Enemy::animateRun(bool anim){
 void Enemy::free(){
 	SDL_DestroyTexture(EnemySheetTexture);
 	EnemySheetTexture = NULL;
-	EnemySheetHeight = 0;
-	EnemySheetWidth = 0;
 }

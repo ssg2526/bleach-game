@@ -12,8 +12,6 @@ Player::Player(){}
 
 Player::Player(float x, float y, string playername){
 	PlayerSheetTexture = NULL;
-	PlayerSheetHeight = 0;
-	PlayerSheetWidth = 0;
 	name = playername;
 	isCollidingBelow = false;
 	collisionBox.x = x;
@@ -56,35 +54,12 @@ void Player::initializeClips(){
 	}
 }
 
-//color keymap not added
-bool Player::loadPlayerFromFile(string path){
-	SDL_Texture* newTexture = NULL;
-	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-	SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, 0, 0xFF, 0xFF ) );
-	newTexture = SDL_CreateTextureFromSurface(gameRenderer, loadedSurface);
-	SDL_FreeSurface(loadedSurface);
-	PlayerSheetTexture = newTexture;
-	PlayerSheetWidth = loadedSurface->w;
-	PlayerSheetHeight = loadedSurface->h;
-	newTexture = NULL;
-	return PlayerSheetTexture!=NULL;
-}
-
 void Player::render(float x, float y, SDL_Rect* clip, SDL_RendererFlip flipType){
-	SDL_Rect spriteRect = {x, y, PlayerSheetWidth, PlayerSheetHeight};
+	SDL_Rect spriteRect = {(int)x, (int)y, 0, 0};
 	spriteRect.w = clip->w;
 	spriteRect.h = clip->h;
 	SDL_RenderCopyEx(gameRenderer, PlayerSheetTexture, clip, &spriteRect, 0, NULL, flipType);
 }
-
-int Player::getWidth(){
-	return PlayerSheetWidth;
-}
-
-int Player::getHeight(){
-	return PlayerSheetHeight;
-}
-
 
 void Player::handleMovement(SDL_Event e){
 	switch(e.key.keysym.sym){
@@ -146,6 +121,12 @@ void Player::updatePos(){
 	tempJvel = tempJvel - (GRAVITY*TIME_STEP);
 	collisionBox.x += xDelPos;
 	collisionBox.y += yDelPos;
+	if(collisionBox.x+collisionBox.w > LEVEL_WIDTH){
+		collisionBox.x = LEVEL_WIDTH-collisionBox.w;
+	}
+	else if(collisionBox.x < 0){
+		collisionBox.x = 0;
+	}
 	// cout<<collisionBox.y<<"		"<<yPrevPos<<endl;
 
 	if(abs(xDelPos)>=EPSILON && isCollidingBelow==true){
@@ -197,10 +178,4 @@ void Player::animateRun(bool anim){
 void Player::free(){
 	SDL_DestroyTexture(PlayerSheetTexture);
 	PlayerSheetTexture = NULL;
-	PlayerSheetHeight = 0;
-	PlayerSheetWidth = 0;
 }
-
-// int main(){
-// 	return 0;
-// }

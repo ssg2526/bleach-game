@@ -9,12 +9,7 @@ class Enemy : public GameObj{
 		Enemy();
 		Enemy(float x, float y, std::string enemyname);
 		~Enemy();
-		bool loadEnemyFromFile(std::string path);
 		void render(float x, float y, SDL_Rect* clip = NULL, SDL_RendererFlip flipType=SDL_FLIP_NONE);
-		//int getWidth();
-		//int getHeight();
-		//void handleMovement(SDL_Event e);
-		//void handleMovement(SDL_Event e, int button_released);
 		void updatePos(SDL_Rect playerCollisionBox);
 		void enemyHitStatic(GameObj object);
 		void free();
@@ -34,9 +29,5 @@ class Enemy : public GameObj{
 		//SDL_Rect camera;
 		void initializeClips();
 		void animateRun(bool anim);
-	private:
-		int EnemySheetWidth;
-		int EnemySheetHeight;
-		SDL_Texture* EnemySheetTexture;
 };
 #endif

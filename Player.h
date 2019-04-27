@@ -10,10 +10,7 @@ class Player : public GameObj{
 		Player();
 		Player(float x, float y, std::string playername);
 		~Player();
-		bool loadPlayerFromFile(std::string path);
 		void render(float x, float y, SDL_Rect* clip = NULL, SDL_RendererFlip flipType=SDL_FLIP_NONE);
-		int getWidth();
-		int getHeight();
 		void handleMovement(SDL_Event e);
 		void handleMovement(SDL_Event e, int button_released);
 		void updatePos();
@@ -35,9 +32,5 @@ class Player : public GameObj{
 		SDL_Rect camera;
 		void initializeClips();
 		void animateRun(bool anim);
-	private:
-		int PlayerSheetWidth;
-		int PlayerSheetHeight;
-		SDL_Texture* PlayerSheetTexture;
 };
 #endif

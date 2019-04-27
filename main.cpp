@@ -1,22 +1,30 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 #include <unistd.h>
 #include "Global.h"
 #include "Player.h"
 #include "GameObj.h"
 #include "Enemy.h"
+#include "Tile.h"
 #include "CollisionDetector.h"
 using namespace std;
 const float FREQUENCY = 60.0;
 const float TIME_STEP = 1.0/FREQUENCY;
-const int SCREEN_WIDTH = 720;
-const int SCREEN_HEIGHT = 817;
+const int SCREEN_WIDTH = 1200;
+const int LEVEL_WIDTH = 2880;
+const int LEVEL_HEIGHT = 700;
+const int SCREEN_HEIGHT = 700;
 const float SECOND = 1000000.0;
 const float EPSILON = .1;
 const float SCALE = 100.0;
 
 SDL_Window* gWindow = NULL;
+SDL_Texture* EnemySheetTexture = NULL;
+SDL_Texture* PlayerSheetTexture = NULL;
+SDL_Texture* TileSheetTexture = NULL;
+
 
 bool init();
 
@@ -24,13 +32,8 @@ bool loadMedia();
 
 void close();
 
-
-SDL_Rect run[4];
-SDL_Rect shoot[3];
-SDL_Rect jump[4];
-SDL_Rect spin[4];
-
 vector<GameObj*> object;
+// vector<Tile> tile_obj;
 
 bool init(){
 	bool success = true;
@@ -66,94 +69,51 @@ bool init(){
 	return success;
 }
 
+bool loadFromFile(string path, string name){
+	SDL_Texture* newTexture = NULL;
+	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
+	SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, 0, 0xFF, 0xFF ) );
+	newTexture = SDL_CreateTextureFromSurface(gameRenderer, loadedSurface);
+	SDL_FreeSurface(loadedSurface);
+	
+	if(name == "enemy"){
+		EnemySheetTexture = newTexture;
+		newTexture = NULL;
+		return EnemySheetTexture!=NULL;
+	}
+	else if(name == "player"){
+		PlayerSheetTexture = newTexture;
+		newTexture = NULL;
+		return PlayerSheetTexture!=NULL;
+	}
+	else if(name == "tiles"){
+		TileSheetTexture = newTexture;
+		newTexture = NULL;
+		return TileSheetTexture!=NULL;
+	}
+	return false;
+	
+}
 
-bool loadMedia(Player* player)
+
+bool loadMedia()
 {
 	//Loading success flag
 	bool success = true;
 
 	//Load sprite sheet texture
-	if( !(*player).loadPlayerFromFile("sprites_folder/sprites.png"))
-	{
-		printf( "Failed to load sprite sheet texture!\n" );
+	if(!loadFromFile("sprites_folder/sprites.png", "player")){
 		success = false;
 	}
-	else
-	{
-		run[0].x = 21;
-		run[0].y = 308;
-		run[0].w = 31;
-		run[0].h = 43;
-
-		run[1].x = 54;
-		run[1].y = 308;
-		run[1].w = 31;
-		run[1].h = 43;
-		
-		run[2].x = 86;
-		run[2].y = 308;
-		run[2].w = 31;
-		run[2].h = 43;
-
-		run[3].x = 54;
-		run[3].y = 308;
-		run[3].w = 31;
-		run[3].h = 43;
-
-		shoot[0].x = 347;
-		shoot[0].y = 652;
-		shoot[0].w = 19;
-		shoot[0].h = 22;
-
-
-		shoot[1].x = 370;
-		shoot[1].y = 651;
-		shoot[1].w = 44;
-		shoot[1].h = 37;
-
-		shoot[2].x = 422;
-		shoot[2].y = 658;
-		shoot[2].w = 44;
-		shoot[2].h = 23;
-
-		spin[0].x =  20;
-		spin[0].y = 484;
-		spin[0].w = 36;
-		spin[0].h = 44;
-
-		spin[1].x = 59;
-		spin[1].y = 485;
-		spin[1].w = 40;
-		spin[1].h = 43;
-
-		spin[2].x = 103;
-		spin[2].y = 482;
-		spin[2].w = 38;
-		spin[2].h = 46;
-
-		spin[3].x = 146;
-		spin[3].y = 490;
-		spin[3].w = 39;
-		spin[3].h = 38;
-
+	else if(!loadFromFile("sprites_folder/enemy1.png", "enemy")){
+		success = false;
 	}
-	return success;
-}
-
-
-bool loadEnemy(Enemy* e1)
-{
-	//Loading success flag
-	bool success = true;
-
-	//Load sprite sheet texture
-	if(!(*e1).loadEnemyFromFile("sprites_folder/enemy1.png"))
-	{
-		printf( "Failed to load enemy sprite sheet texture!\n" );
+	else if(!loadFromFile("sprites_folder/tiles.png", "tiles")){
 		success = false;
 	}
 	return success;
 }
+
 
 void close(Player* player)
 {
@@ -171,12 +131,60 @@ void close(Player* player)
 	SDL_Quit();
 }
 
+void render_tile_set(vector<Tile> &tile_obj, SDL_Rect cam){
+    // int x=0;
+    // int y=500;
+    SDL_Rect clip = {772, 654, 60, 50};
+    for(int i=0; i<tile_obj.size(); i++){
+        if(tile_obj[i].type != "0"){
+            tile_obj[i].render(tile_obj[i].collisionBox.x-cam.x, tile_obj[i].collisionBox.y-cam.y, &clip, SDL_FLIP_NONE);
+        }
+    }
+}
+
+vector<Tile> initiate_tiles(){
+	vector<Tile> tile_obj;
+	ifstream in;
+	string type;
+	in.open("tile_map.txt");
+	int x=0,y=0,i=1;
+	while(!in.eof()){
+		in>>type;
+		Tile tile(x, y, type);
+		x = x+60;
+		if(i%48 == 0){
+			x = 0;
+			y = y+50;
+		}
+		
+		tile_obj.push_back(tile);
+		if(type != "0"){
+			// object.push_back(&tile);
+		}
+		// cout<<tile.type<<","<<i<<" ";
+		i++;
+		// bool success = true;
+		// //Load sprite sheet texture
+		// if(!(*e1).loadEnemyFromFile("sprites_folder/enemy1.png"))
+		// {
+		// 	printf( "Failed to load enemy sprite sheet texture!\n" );
+		// 	success = false;
+		// }
+		// return success;
+		
+	}
+	// render_tile_set(tile_obj);
+	return tile_obj;
+}
+
 int main(int argc, char* args[]){
-	Player player(200, 400, "player");
-	Enemy e1(550 ,400, "e1");
+	vector<Tile> tile_obj;
+	Player player(200, 200, "player");
+	Enemy e1(550 ,200, "e1");
 	CollisionDetector c_detector;// = new CollisionDetector();
-	GameObj ground(-10, 500, 750, 50, "game_object");
-	GameObj wall(452, 203, 60, 200, "game_object");
+	GameObj ground(-10, 300, 3000, 50, "game_object");
+	GameObj wall(452, 140, 60, 150, "game_object");
+	// initiate_tiles();
 	object.push_back(&e1);
 	object.push_back(&player);
 	
@@ -190,13 +198,11 @@ int main(int argc, char* args[]){
 		cout<<"failed to initialize";
 	}
 	else{
-		if(!loadMedia(&player)){
+		if(!loadMedia()){
 			cout<<"unable to load media";
 		}
-		else if(!loadEnemy(&e1)){
-			cout<<"unable to load enemy";
-		}
 		else{
+			tile_obj = initiate_tiles();
 			bool quit = false;
 			SDL_Event e;
 			
@@ -223,17 +229,16 @@ int main(int argc, char* args[]){
 
 				SDL_SetRenderDrawColor( gameRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
 				SDL_RenderClear( gameRenderer );
-				//player.render(player.collisionBox.x, player.collisionBox.y, &run[i/4], player.flipType);
 				camera.x = (player.collisionBox.x+player.collisionBox.w/2)-SCREEN_WIDTH/2;
 				camera.y = 0;
 				if( camera.x < 0 )
 				{ 
 					camera.x = 0;
 				}
-				if( camera.y < 0 )
-				{
-					camera.y = 0;
+				if(camera.x + SCREEN_WIDTH > LEVEL_WIDTH){
+					camera.x = LEVEL_WIDTH - SCREEN_WIDTH;
 				}
+				render_tile_set(tile_obj, camera);
 				player.render(player.collisionBox.x - camera.x, player.collisionBox.y - camera.y, &player.renderingClip, player.flipType);
 				
 				e1.render(e1.collisionBox.x - camera.x, e1.collisionBox.y - camera.y, &e1.renderingClip, e1.flipType);
