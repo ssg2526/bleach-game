@@ -10,7 +10,7 @@ const float GRAVITY = 9.81;
 
 Player::Player(){}
 
-Player::Player(float x, float y, string playername){
+Player::Player(float x, float y, int obj_code, string playername){
 	PlayerSheetTexture = NULL;
 	name = playername;
 	isCollidingBelow = false;
@@ -18,6 +18,7 @@ Player::Player(float x, float y, string playername){
 	collisionBox.y = y;
 	collisionBox.w = 30.0;
 	collisionBox.h = 42.0;	
+	code = obj_code;
 	xPrevPos = x;
 	yPrevPos = y;
 	maxVel = 2.0;

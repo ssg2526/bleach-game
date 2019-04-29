@@ -7,13 +7,14 @@
 class Enemy : public GameObj{
 	public:
 		Enemy();
-		Enemy(float x, float y, std::string enemyname);
+		Enemy(float x, float y, int obj_code, std::string enemyname);
 		~Enemy();
 		void render(float x, float y, SDL_Rect* clip = NULL, SDL_RendererFlip flipType=SDL_FLIP_NONE);
 		void updatePos(SDL_Rect playerCollisionBox);
 		void enemyHitStatic(GameObj object);
 		void free();
 		bool isCollidingBelow;
+		// int code;
 		float xPrevPos;
 		float yPrevPos;
 		float maxVel;

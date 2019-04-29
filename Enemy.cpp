@@ -7,7 +7,7 @@ using namespace std;
 
 Enemy::Enemy(){}
 
-Enemy::Enemy(float x, float y, std::string enemyname){
+Enemy::Enemy(float x, float y, int obj_code, std::string enemyname){
 	initializeClips();
 	name = enemyname;
 	isCollidingBelow = false;
@@ -15,6 +15,7 @@ Enemy::Enemy(float x, float y, std::string enemyname){
 	collisionBox.y = y;
 	collisionBox.w = 50.0;
 	collisionBox.h = 66.0;	
+	code = obj_code;
 	xPrevPos = x;
 	yPrevPos = y;
 	maxVel = 1.5;

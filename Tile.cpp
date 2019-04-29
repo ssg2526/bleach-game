@@ -4,13 +4,24 @@
 #include <fstream>
 
 using namespace std;
-Tile::Tile(int x, int y, string tile_type){
+
+Tile::Tile(){}
+
+Tile::Tile(float x, float y, int obj_code, string tile_type, string obj_name){
     collisionBox.x = x;
     collisionBox.y = y;
-    collisionBox.w = 60;
-    collisionBox.h = 50;
+    collisionBox.w = 60.0;
+    collisionBox.h = 50.0;
     type = tile_type;
+	name = obj_name;
+    code = obj_code;
 }
+
+Tile::~Tile(){
+    // cout<<"called ";
+    free();
+}
+
 
 void Tile::render(float x, float y, SDL_Rect* clip, SDL_RendererFlip flipType){
     SDL_Rect spriteRect = {(int)x, (int)y, 0, 0};
@@ -18,4 +29,9 @@ void Tile::render(float x, float y, SDL_Rect* clip, SDL_RendererFlip flipType){
 	spriteRect.h = clip->h;
     SDL_RenderCopyEx(gameRenderer, TileSheetTexture, clip, &spriteRect, 0, NULL, flipType);
 	// cout<<"s";
+}
+
+void Tile::free(){
+	SDL_DestroyTexture(PlayerSheetTexture);
+	TileSheetTexture = NULL;
 }

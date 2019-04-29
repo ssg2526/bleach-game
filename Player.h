@@ -8,7 +8,7 @@
 class Player : public GameObj{
 	public:
 		Player();
-		Player(float x, float y, std::string playername);
+		Player(float x, float y, int obj_code,std::string playername);
 		~Player();
 		void render(float x, float y, SDL_Rect* clip = NULL, SDL_RendererFlip flipType=SDL_FLIP_NONE);
 		void handleMovement(SDL_Event e);
@@ -16,6 +16,7 @@ class Player : public GameObj{
 		void updatePos();
 		void playerHitStatic(GameObj object);
 		void free();
+		// int code;
 		bool isCollidingBelow;
 		float xPrevPos;
 		float yPrevPos;

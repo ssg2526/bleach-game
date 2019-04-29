@@ -131,65 +131,71 @@ void close(Player* player)
 	SDL_Quit();
 }
 
+
+void closee(Enemy* player)
+{
+	//Free loaded images
+	(*player).free();
+}
+
+void closeTile(Tile* tile){
+	(*tile).free();
+}
+
 void render_tile_set(vector<Tile> &tile_obj, SDL_Rect cam){
-    // int x=0;
-    // int y=500;
     SDL_Rect clip = {772, 654, 60, 50};
     for(int i=0; i<tile_obj.size(); i++){
-        if(tile_obj[i].type != "0"){
-            tile_obj[i].render(tile_obj[i].collisionBox.x-cam.x, tile_obj[i].collisionBox.y-cam.y, &clip, SDL_FLIP_NONE);
-        }
+		tile_obj[i].render(tile_obj[i].collisionBox.x-cam.x, tile_obj[i].collisionBox.y-cam.y, &clip, SDL_FLIP_NONE);
+        
     }
 }
 
-vector<Tile> initiate_tiles(){
-	vector<Tile> tile_obj;
+void tiles_to_object_list(vector<Tile> &tile_obj){
+	for(int i=0; i<tile_obj.size(); i++){
+		object.push_back(&tile_obj[i]);
+		// cout<<(*object[i]).name<<" ";
+	}
+}
+
+void initiate_tiles(vector<Tile> &tile_obj){
 	ifstream in;
 	string type;
 	in.open("tile_map.txt");
-	int x=0,y=0,i=1;
+	float x=0,y=0;
+	int i=1,ct=0;
 	while(!in.eof()){
 		in>>type;
-		Tile tile(x, y, type);
+		if(type == "1"){
+			Tile tile(x, y, 0, type, "ground");
+			tile_obj.push_back(tile);
+			// object.push_back(&tile_obj[i-1]);
+
+		}
 		x = x+60;
 		if(i%48 == 0){
 			x = 0;
 			y = y+50;
 		}
-		
-		tile_obj.push_back(tile);
-		if(type != "0"){
-			// object.push_back(&tile);
-		}
-		// cout<<tile.type<<","<<i<<" ";
 		i++;
-		// bool success = true;
-		// //Load sprite sheet texture
-		// if(!(*e1).loadEnemyFromFile("sprites_folder/enemy1.png"))
-		// {
-		// 	printf( "Failed to load enemy sprite sheet texture!\n" );
-		// 	success = false;
-		// }
-		// return success;
-		
 	}
-	// render_tile_set(tile_obj);
-	return tile_obj;
 }
 
 int main(int argc, char* args[]){
+	
 	vector<Tile> tile_obj;
-	Player player(200, 200, "player");
-	Enemy e1(550 ,200, "e1");
+	Player player(200, 200, 1, "player");
+	Enemy e1(550 ,200, -1, "e1");
 	CollisionDetector c_detector;// = new CollisionDetector();
-	GameObj ground(-10, 300, 3000, 50, "game_object");
-	GameObj wall(452, 140, 60, 150, "game_object");
-	// initiate_tiles();
+	GameObj ground(-10, 300, 3000, 50, 0, "game_object");
+	GameObj wall(452, 140, 60, 150, 0, "game_object");
+	initiate_tiles(tile_obj);
+	tiles_to_object_list(tile_obj);
+	object.push_back(&ground);
+	object.push_back(&wall);
 	object.push_back(&e1);
 	object.push_back(&player);
 	
-	object.push_back(&ground);
-	object.push_back(&wall);
+	
 	
 	bool stopAnimation = true;
 	SDL_Rect camera = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
@@ -202,12 +208,13 @@ int main(int argc, char* args[]){
 			cout<<"unable to load media";
 		}
 		else{
-			tile_obj = initiate_tiles();
 			bool quit = false;
 			SDL_Event e;
+			int ct=0;
 			
 			while(!quit){
 				while(SDL_PollEvent(&e)!=0){
+					
 					if(e.type == SDL_QUIT){
 						quit = true;
 					}
@@ -225,7 +232,9 @@ int main(int argc, char* args[]){
 				e1.updatePos(player.collisionBox);
 				player.updatePos();
 				
+				
 				c_detector.checkCollision(object);
+				
 
 				SDL_SetRenderDrawColor( gameRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
 				SDL_RenderClear( gameRenderer );
@@ -253,11 +262,19 @@ int main(int argc, char* args[]){
 				SDL_RenderDrawRect( gameRenderer, &wll );
 				SDL_RenderPresent( gameRenderer );
 				usleep(SECOND*TIME_STEP);
+				
 			}
 		}
 	}
 	close(&player);
-	// close(&e1);
+	closee(&e1);
+	for(int i=0;i<tile_obj.size();i++){
+		// close(&tile_obj[i]);
+		// Tile* p = &tile_obj[i]; 
+		// delete &tile_obj[i];
+		// tile_obj[i]=NULL;
+		closeTile(&tile_obj[i]);
+	}
 	return 0;
 }
 
