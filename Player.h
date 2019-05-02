@@ -9,13 +9,12 @@ class Player : public GameObj{
 	public:
 		Player();
 		Player(float x, float y, int obj_code,std::string playername);
-		~Player();
 		void render(float x, float y, SDL_Rect* clip = NULL, SDL_RendererFlip flipType=SDL_FLIP_NONE);
 		void handleMovement(SDL_Event e);
 		void handleMovement(SDL_Event e, int button_released);
 		void updatePos();
 		void playerHitStatic(GameObj object);
-		void free();
+		// void free();
 		// int code;
 		bool isCollidingBelow;
 		float xPrevPos;

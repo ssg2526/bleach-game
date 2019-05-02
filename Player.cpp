@@ -36,9 +36,6 @@ Player::Player(float x, float y, int obj_code, string playername){
 	flipType = SDL_FLIP_NONE;
 }
 
-Player::~Player(){
-	free();
-}
 
 
 void Player::initializeClips(){
@@ -96,7 +93,7 @@ void Player::handleMovement(SDL_Event e){
 		break;
 		case SDLK_z:
 			xDelPos = 0;
-
+			
 			BYPASS = true;
 			// animate("shoot");
 			// Bullet bullet(collisionBox.x+collisionBox.w, collisionBox.y+collisionBox.h/4);
@@ -232,10 +229,5 @@ void Player::animate(string act){
 	
 }
 
-
-void Player::free(){
-	SDL_DestroyTexture(PlayerSheetTexture);
-	PlayerSheetTexture = NULL;
-}
 
 

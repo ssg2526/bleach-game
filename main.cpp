@@ -27,6 +27,8 @@ SDL_Texture* EnemySheetTexture = NULL;
 SDL_Texture* PlayerSheetTexture = NULL;
 SDL_Texture* TileSheetTexture = NULL;
 
+SDL_Rect camera = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+
 
 bool init();
 
@@ -120,9 +122,9 @@ bool loadMedia()
 void close(Player* player)
 {
 	//Free loaded images
-	(*player).free();
 
-	//Destroy window	
+	//Destroy window
+	// SDL_DestroyTexture(player->PlayerSheetTexture);	
 	SDL_DestroyRenderer( gameRenderer );
 	SDL_DestroyWindow( gWindow );
 	gWindow = NULL;
@@ -137,27 +139,13 @@ void close(Player* player)
 void closee(Enemy* player)
 {
 	//Free loaded images
-	(*player).free();
+	// (*player).free();
 }
 
 void closeTile(Tile* tile){
-	(*tile).free();
+	// (*tile).free();
 }
 
-void render_tile_set(vector<Tile> &tile_obj, SDL_Rect cam){
-    SDL_Rect clip = {772, 654, 60, 50};
-    for(int i=0; i<tile_obj.size(); i++){
-		tile_obj[i].render(tile_obj[i].collisionBox.x-cam.x, tile_obj[i].collisionBox.y-cam.y, &clip, SDL_FLIP_NONE);
-        
-    }
-}
-
-void tiles_to_object_list(vector<Tile> &tile_obj){
-	for(int i=0; i<tile_obj.size(); i++){
-		object.push_back(&tile_obj[i]);
-		// cout<<(*object[i]).name<<" ";
-	}
-}
 
 void initiate_tiles(vector<Tile> &tile_obj){
 	ifstream in;
@@ -189,35 +177,52 @@ void update_bullets(vector<Bullet> &bullet_vec){
 	}
 }
 
-void bullet_to_object_list(vector<Bullet> &bullet_vec){
-	for(int i=0; i<bullet_vec.size(); i++){
-		object.push_back(&bullet_vec[i]);
-		// cout<<(*object[i]).name<<" ";
-	}
-}
 
-void render_bullets(vector<Bullet> &bullet_vec, SDL_Rect camera){
-	for(int i=0; i<bullet_vec.size(); i++){
-		// bullet_vec[i].render(); 
-		SDL_Rect blt = {bullet_vec[i].collisionBox.x-camera.x, bullet_vec[i].collisionBox.y, bullet_vec[i].collisionBox.w, bullet_vec[i].collisionBox.h};
-		SDL_RenderDrawRect( gameRenderer, &blt );
-	}
-}
 
-void render_world(int camx, int camy){
+void render_world(SDL_Rect playerBox){
 	SDL_SetRenderDrawColor( gameRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
 	SDL_RenderClear( gameRenderer );
 	SDL_SetRenderDrawColor( gameRenderer, 0x00, 0x00, 0x00, 0xFF );
-
+	camera.x = (playerBox.x+playerBox.w/2)-SCREEN_WIDTH/2;
+	camera.y = 0;
+	if( camera.x < 0 )
+	{ 
+		camera.x = 0;
+	}
+	if(camera.x + SCREEN_WIDTH > LEVEL_WIDTH){
+		camera.x = LEVEL_WIDTH - SCREEN_WIDTH;
+	}
 	for(int i=0; i<object.size(); i++){
 		if(object[i]->name == "pbullet"){
-			SDL_Rect blt = {object[i]->collisionBox.x-camx, object[i]->collisionBox.y, object[i]->collisionBox.w, object[i]->collisionBox.h};
+			SDL_Rect blt = {object[i]->collisionBox.x-camera.x, object[i]->collisionBox.y, object[i]->collisionBox.w, object[i]->collisionBox.h};
 			SDL_RenderDrawRect( gameRenderer, &blt );
 		}
 		else{
-			(*object[i]).render(object[i]->collisionBox.x-camx, object[i]->collisionBox.y, &object[i]->renderingClip, object[i]->flipType);
+			(*object[i]).render(object[i]->collisionBox.x-camera.x, object[i]->collisionBox.y, &object[i]->renderingClip, object[i]->flipType);
 		}
 		
+	}
+}
+
+void update_world(SDL_Rect playerBox){
+	for(int i=0; i<object.size(); i++){
+		if(object[i]->name != "ground"){
+			if(object[i]->name == "e1"){
+				object[i]->updatePos(playerBox);
+			}
+			else{
+				if(object[i]->name == "pbullet"){
+					Bullet* b = dynamic_cast<Bullet*>(object[i]);
+					if(abs(b->startPos - b->collisionBox.x) >= b->lifeSpan){
+						delete object[i];
+						object.erase(object.begin()+i);
+						continue;
+					}
+				}
+				object[i]->updatePos();
+				
+			}
+		}
 	}
 }
 
@@ -225,19 +230,18 @@ int main(int argc, char* args[]){
 	
 	vector<Tile> tile_obj;
 	vector<Bullet> bullet_vec;
-	Player* player = new Player(200, 300, 1, "player");
-	Enemy* e1 = new Enemy(750 ,250, -1, "e1");
+	Player* player = new Player(200, 400, 1, "player");
+	Enemy* e1 = new Enemy(950 ,250, -1, "e1");
 	CollisionDetector c_detector;// = new CollisionDetector();
 	initiate_tiles(tile_obj);
 	object.push_back(e1);
 	object.push_back(player);
-	// Bullet* bullet;
-	Bullet* bullet = new Bullet(player->collisionBox.x+player->collisionBox.w, player->collisionBox.y+10, "pbullet");
-	object.push_back(bullet);
+	Bullet* bullet;
+	// Bullet* bullet = new Bullet(player->collisionBox.x+player->collisionBox.w, player->collisionBox.y+10, "pbullet");
+	// object.push_back(bullet);
 	
 	
 	bool stopAnimation = true;
-	SDL_Rect camera = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 	int i=0;
 	if(!init()){
 		cout<<"failed to initialize";
@@ -262,9 +266,10 @@ int main(int argc, char* args[]){
 							if(e.type == SDL_KEYDOWN && e.key.repeat==0){
 								player->handleMovement(e);
 								if(e.key.keysym.sym == SDLK_z){
-									// (*bullet).~Bullet();
-									delete bullet;
-									// cout<<"zxcv";
+									// delete bullet; //doubt
+									Bullet* bullet = new Bullet(player->collisionBox.x+player->collisionBox.w, player->collisionBox.y+10, "pbullet", player->flipType);
+									// bullet = blt;
+									object.push_back(bullet);
 								}
 							}
 							else{
@@ -276,30 +281,14 @@ int main(int argc, char* args[]){
 						
 					}
 				}
-				player->updatePos();
-				e1->updatePos(player->collisionBox);
-				// bullet.updatePos();
-				// bullet_to_object_list(bullet_vec);
-				// update_bullets(bullet_vec);
-				bullet->updatePos();
 				// cout<<bullet->collisionBox.x<<" ";
-				
-				c_detector.checkCollision(object);
-				
-				/////////////////////////////RENDERING////////////////////////////////
 
-				
-				camera.x = (player->collisionBox.x+player->collisionBox.w/2)-SCREEN_WIDTH/2;
-				camera.y = 0;
-				if( camera.x < 0 )
-				{ 
-					camera.x = 0;
-				}
-				if(camera.x + SCREEN_WIDTH > LEVEL_WIDTH){
-					camera.x = LEVEL_WIDTH - SCREEN_WIDTH;
-				}
-				render_world(camera.x, camera.y);
-				
+				update_world(player->collisionBox);
+
+				c_detector.checkCollision(object);
+
+				render_world(player->collisionBox);
+
 
 				SDL_RenderPresent( gameRenderer );
 				usleep(SECOND*TIME_STEP);

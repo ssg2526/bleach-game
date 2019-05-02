@@ -37,8 +37,8 @@ void CollisionDetector::checkCollision(vector<GameObj*> &object){
 							if((*object[j]).name=="e1"){
 								// cout<<(*object[j]).name<<"		"<<(*object[i]).name<<endl;
 								(*object[i]).bulletHitEnemy(*object[j]);
-								delete object[i];
-								object.erase(object.begin()+i);
+								// delete object[i];
+								// object.erase(object.begin()+i);
 							}
 						}
 					}

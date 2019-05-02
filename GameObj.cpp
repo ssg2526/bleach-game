@@ -16,5 +16,7 @@ GameObj::GameObj(float x, float y, float w, float h, int obj_code,string objname
 void GameObj::playerHitStatic(GameObj object){}
 void GameObj::enemyHitStatic(GameObj object){}
 void GameObj::bulletHitEnemy(GameObj object){}
+void GameObj::updatePos(){}
+void GameObj::updatePos(SDL_Rect playerBox){}
 void GameObj::render(float x, float y, SDL_Rect* clip , SDL_RendererFlip flipType){}
 void GameObj::free(){}

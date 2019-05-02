@@ -33,9 +33,6 @@ Enemy::Enemy(float x, float y, int obj_code, std::string enemyname){
 
 }
 
-Enemy::~Enemy(){
-	free();
-}
 
 void Enemy::initializeClips(){
 	ifstream in;
@@ -141,9 +138,4 @@ void Enemy::animateRun(bool anim){
 	if(i==36 || anim==false){
 		i=0;
 	}
-}
-
-void Enemy::free(){
-	SDL_DestroyTexture(EnemySheetTexture);
-	EnemySheetTexture = NULL;
 }
