@@ -26,12 +26,16 @@ class Player : public GameObj{
 		int jumpCount;
 		float xDelPos;
 		float yDelPos;
-		SDL_RendererFlip flipType;
+		// SDL_RendererFlip flipType;
 		vector<SDL_Rect> run;
 		vector<SDL_Rect> jump;
-		SDL_Rect renderingClip;
+		// SDL_Rect renderingClip;
 		SDL_Rect camera;
 		void initializeClips();
-		void animateRun(bool anim);
+		void animate(string act);
+		// void animateStand(bool anim);
+
 };
+
+
 #endif

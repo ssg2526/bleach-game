@@ -21,5 +21,5 @@ extern const float TIME_STEP;
 extern const float SECOND;
 extern const float EPSILON;
 extern const float SCALE;
-
+extern bool BYPASS;
 #endif

@@ -10,8 +10,12 @@ class GameObj{
 		SDL_Rect collisionBox;
 		string name;
 		int code;
+		SDL_Rect renderingClip;
+		SDL_RendererFlip flipType;
 		virtual void playerHitStatic(GameObj object);
 		virtual void enemyHitStatic(GameObj object);
+		virtual void bulletHitEnemy(GameObj object);
+		virtual void render(float x, float y, SDL_Rect* clip = NULL, SDL_RendererFlip flipType=SDL_FLIP_NONE);
 		virtual void free();
 
 

@@ -15,6 +15,8 @@ Tile::Tile(float x, float y, int obj_code, string tile_type, string obj_name){
     type = tile_type;
 	name = obj_name;
     code = obj_code;
+    flipType = SDL_FLIP_NONE;
+    renderingClip = {772, 654, 60, 50};
 }
 
 Tile::~Tile(){

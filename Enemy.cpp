@@ -13,8 +13,8 @@ Enemy::Enemy(float x, float y, int obj_code, std::string enemyname){
 	isCollidingBelow = false;
 	collisionBox.x = x;
 	collisionBox.y = y;
-	collisionBox.w = 50.0;
-	collisionBox.h = 66.0;	
+	collisionBox.w = 75.0;
+	collisionBox.h = 98.0;	
 	code = obj_code;
 	xPrevPos = x;
 	yPrevPos = y;
@@ -54,8 +54,8 @@ void Enemy::initializeClips(){
 
 void Enemy::render(float x, float y, SDL_Rect* clip, SDL_RendererFlip flipType){
 	SDL_Rect spriteRect = {(int)x, (int)y, 0, 0};
-	spriteRect.w = clip->w;
-	spriteRect.h = clip->h;
+	spriteRect.w = clip->w*1.5;
+	spriteRect.h = clip->h*1.5;
 	SDL_RenderCopyEx(gameRenderer, EnemySheetTexture, clip, &spriteRect, 0, NULL, flipType);
 }
 
