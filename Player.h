@@ -14,8 +14,6 @@ class Player : public GameObj{
 		void handleMovement(SDL_Event e, int button_released);
 		void updatePos();
 		void playerHitStatic(GameObj object);
-		// void free();
-		// int code;
 		bool isCollidingBelow;
 		float xPrevPos;
 		float yPrevPos;

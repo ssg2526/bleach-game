@@ -11,9 +11,11 @@ class Enemy : public GameObj{
 		void render(float x, float y, SDL_Rect* clip = NULL, SDL_RendererFlip flipType=SDL_FLIP_NONE);
 		void updatePos(SDL_Rect playerCollisionBox);
 		void enemyHitStatic(GameObj object);
+		void renderHealthBar(SDL_Rect fillHealth);
 		// void free();
 		bool isCollidingBelow;
 		// int code;
+		int health;
 		float xPrevPos;
 		float yPrevPos;
 		float maxVel;
@@ -28,6 +30,7 @@ class Enemy : public GameObj{
 		// SDL_Rect renderingClip;
 		//SDL_Rect camera;
 		void initializeClips();
+		void bulletHitEnemy(GameObj obj);
 		void animateRun(bool anim);
 };
 #endif

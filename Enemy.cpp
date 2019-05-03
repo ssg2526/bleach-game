@@ -10,6 +10,7 @@ Enemy::Enemy(){}
 Enemy::Enemy(float x, float y, int obj_code, std::string enemyname){
 	initializeClips();
 	name = enemyname;
+	health = 100;
 	isCollidingBelow = false;
 	collisionBox.x = x;
 	collisionBox.y = y;
@@ -48,12 +49,37 @@ void Enemy::initializeClips(){
 	}
 }
 
+void Enemy::renderHealthBar(SDL_Rect fillHealth){
+	float percentHealth = health/100.0;
+	int barWidth = collisionBox.w-25;
+	SDL_SetRenderDrawColor( gameRenderer, 0, 100, 0, 0xFF );
+	SDL_Rect emptyHealth;
+	if(flipType == SDL_FLIP_NONE){
+		fillHealth.x = fillHealth.x+25;
+	}
+	else{
+		fillHealth.x = fillHealth.x-10;
+	}
+	fillHealth.y = fillHealth.y - 10;
+	fillHealth.h = 5;
+	fillHealth.w = barWidth*percentHealth;
+	SDL_RenderFillRect(gameRenderer, &fillHealth);
+	emptyHealth.x = fillHealth.x+fillHealth.w;
+	emptyHealth.y = fillHealth.y;
+	emptyHealth.h = 5;
+	emptyHealth.w = barWidth*(1.0-percentHealth);
+	SDL_SetRenderDrawColor( gameRenderer, 255, 0, 0, 0xFF );
+	SDL_RenderFillRect(gameRenderer, &emptyHealth);
+	SDL_SetRenderDrawColor( gameRenderer, 0x00, 0x00, 0x00, 0xFF );
+}
+
 
 void Enemy::render(float x, float y, SDL_Rect* clip, SDL_RendererFlip flipType){
 	SDL_Rect spriteRect = {(int)x, (int)y, 0, 0};
 	spriteRect.w = clip->w*1.5;
 	spriteRect.h = clip->h*1.5;
 	SDL_RenderCopyEx(gameRenderer, EnemySheetTexture, clip, &spriteRect, 0, NULL, flipType);
+	Enemy::renderHealthBar(spriteRect);
 }
 
 
@@ -127,6 +153,10 @@ void Enemy::enemyHitStatic(GameObj object){
 			}
 		}
 	}
+}
+
+void Enemy::bulletHitEnemy(GameObj obj){
+	health -= 5;
 }
 
 

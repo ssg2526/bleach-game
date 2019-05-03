@@ -35,9 +35,8 @@ bool init();
 bool loadMedia();
 
 void close();
-
+// extern std::vector<GameObj*> object;
 vector<GameObj*> object;
-// vector<Tile> tile_obj;
 
 bool init(){
 	bool success = true;
@@ -208,6 +207,12 @@ void update_world(SDL_Rect playerBox){
 	for(int i=0; i<object.size(); i++){
 		if(object[i]->name != "ground"){
 			if(object[i]->name == "e1"){
+				Enemy* e = dynamic_cast<Enemy*>(object[i]);
+				if(e->health <= 0){
+					delete object[i];
+					object.erase(object.begin()+i);
+					continue;
+				}
 				object[i]->updatePos(playerBox);
 			}
 			else{
@@ -281,7 +286,6 @@ int main(int argc, char* args[]){
 						
 					}
 				}
-				// cout<<bullet->collisionBox.x<<" ";
 
 				update_world(player->collisionBox);
 
@@ -298,13 +302,6 @@ int main(int argc, char* args[]){
 	}
 	close(player);
 	closee(e1);
-	for(int i=0;i<tile_obj.size();i++){
-		// close(&tile_obj[i]);
-		// Tile* p = &tile_obj[i]; 
-		// delete &tile_obj[i];
-		// tile_obj[i]=NULL;
-		closeTile(&tile_obj[i]);
-	}
 	return 0;
 }
 

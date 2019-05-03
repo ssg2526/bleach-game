@@ -1,5 +1,7 @@
 #include "Global.h"
+#include "Bullet.h"
 #include "Player.h"
+#include "GameObj.h"
 #include <cmath>
 #include <fstream>
 
@@ -93,7 +95,8 @@ void Player::handleMovement(SDL_Event e){
 		break;
 		case SDLK_z:
 			xDelPos = 0;
-			
+			// Bullet* bullet = new Bullet(collisionBox.x+collisionBox.w, collisionBox.y+10, "pbullet", flipType);
+			// object.push_back(bullet);
 			BYPASS = true;
 			// animate("shoot");
 			// Bullet bullet(collisionBox.x+collisionBox.w, collisionBox.y+collisionBox.h/4);
