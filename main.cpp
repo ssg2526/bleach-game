@@ -26,6 +26,7 @@ SDL_Window* gWindow = NULL;
 SDL_Texture* EnemySheetTexture = NULL;
 SDL_Texture* PlayerSheetTexture = NULL;
 SDL_Texture* TileSheetTexture = NULL;
+SDL_Texture* MoonTexture = NULL;
 
 SDL_Rect camera = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 
@@ -35,7 +36,6 @@ bool init();
 bool loadMedia();
 
 void close();
-// extern std::vector<GameObj*> object;
 vector<GameObj*> object;
 
 bool init(){
@@ -60,7 +60,7 @@ bool init(){
 				cout<<"renderer could not be created";
 			}
 			else{
-				SDL_SetRenderDrawColor(gameRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+				SDL_SetRenderDrawColor(gameRenderer, 0, 0, 0, 255);
 				int imgFlags = IMG_INIT_PNG;
 				if(!(IMG_Init(imgFlags) & imgFlags)){
 					cout<<"SDL image could not be initialized";
@@ -94,6 +94,11 @@ bool loadFromFile(string path, string name){
 		newTexture = NULL;
 		return TileSheetTexture!=NULL;
 	}
+	else if(name == "moon"){
+		MoonTexture = newTexture;
+		newTexture = NULL;
+		return MoonTexture!=NULL;
+	}
 	return false;
 	
 }
@@ -104,14 +109,17 @@ bool loadMedia()
 	//Loading success flag
 	bool success = true;
 
-	//Load sprite sheet texture
+	//Load sprite sheet textureTIME_STEP
 	if(!loadFromFile("sprites_folder/ichigo3.png", "player")){
 		success = false;
 	}
-	else if(!loadFromFile("sprites_folder/enemy1.png", "enemy")){
+	if(!loadFromFile("sprites_folder/enemy1.png", "enemy")){
 		success = false;
 	}
-	else if(!loadFromFile("sprites_folder/tiles.png", "tiles")){
+	if(!loadFromFile("sprites_folder/tiles.png", "tiles")){
+		success = false;
+	}
+	if(!loadFromFile("sprites_folder/moon3.png", "moon")){
 		success = false;
 	}
 	return success;
@@ -146,7 +154,7 @@ void closeTile(Tile* tile){
 }
 
 
-void initiate_tiles(vector<Tile> &tile_obj){
+void initiate_tiles(){
 	ifstream in;
 	string type;
 	in.open("tile_map.txt");
@@ -155,11 +163,15 @@ void initiate_tiles(vector<Tile> &tile_obj){
 	while(!in.eof()){
 		in>>type;
 		if(type == "1"){
-			// Tile tile(x, y, 0, type, "ground");
 			Tile* tile = new Tile(x, y, 0, type, "ground");
-			tile_obj.push_back(*tile);
+			tile->renderingClip = {772, 654, 128, 128};
 			object.push_back(tile);
 
+		}
+		else if(type == "2"){
+			Tile* tile = new Tile(x, y, 0, type, "ground");
+			tile->renderingClip = {514, 400, 128, 128};
+			object.push_back(tile);
 		}
 		x = x+60;
 		if(i%48 == 0){
@@ -170,19 +182,14 @@ void initiate_tiles(vector<Tile> &tile_obj){
 	}
 }
 
-void update_bullets(vector<Bullet> &bullet_vec){
-	for(int i=0; i<bullet_vec.size(); i++){
-		bullet_vec[i].updatePos(); 
-	}
-}
-
-
 
 void render_world(SDL_Rect playerBox){
-	SDL_SetRenderDrawColor( gameRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+	// SDL_SetRenderDrawColor( gameRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+	SDL_SetRenderDrawColor( gameRenderer, 0, 0, 0, 255 );
 	SDL_RenderClear( gameRenderer );
-	SDL_SetRenderDrawColor( gameRenderer, 0x00, 0x00, 0x00, 0xFF );
-	camera.x = (playerBox.x+playerBox.w/2)-SCREEN_WIDTH/2;
+	SDL_SetRenderDrawColor( gameRenderer, 255, 255, 255, 255 );	
+	// SDL_SetRenderDrawColor( gameRenderer, 0x00, 0x00, 0x00, 0xFF );
+	camera.x = (playerBox.x+playerBox.w/2)-SCREEN_WIDTH*3.0/5;
 	camera.y = 0;
 	if( camera.x < 0 )
 	{ 
@@ -191,15 +198,21 @@ void render_world(SDL_Rect playerBox){
 	if(camera.x + SCREEN_WIDTH > LEVEL_WIDTH){
 		camera.x = LEVEL_WIDTH - SCREEN_WIDTH;
 	}
+	// for(int i=0; i<1000; i++){
+
+	// }
+	SDL_Rect rect= {900, 50, 120, 120};
+	SDL_Rect clip = {336, 351, 400, 400};
+	SDL_RenderCopy(gameRenderer, MoonTexture, &clip, &rect);
 	for(int i=0; i<object.size(); i++){
-		if(object[i]->name == "pbullet"){
+		if(object[i]->name == "pbullet" || object[i]->name == "ebullet"){
 			SDL_Rect blt = {object[i]->collisionBox.x-camera.x, object[i]->collisionBox.y, object[i]->collisionBox.w, object[i]->collisionBox.h};
 			SDL_RenderDrawRect( gameRenderer, &blt );
 		}
 		else{
 			(*object[i]).render(object[i]->collisionBox.x-camera.x, object[i]->collisionBox.y, &object[i]->renderingClip, object[i]->flipType);
 		}
-		
+		SDL_SetRenderDrawColor(gameRenderer, 255, 255, 255, 255);
 	}
 }
 
@@ -233,17 +246,12 @@ void update_world(SDL_Rect playerBox){
 
 int main(int argc, char* args[]){
 	
-	vector<Tile> tile_obj;
-	vector<Bullet> bullet_vec;
 	Player* player = new Player(200, 400, 1, "player");
 	Enemy* e1 = new Enemy(950 ,250, -1, "e1");
 	CollisionDetector c_detector;// = new CollisionDetector();
-	initiate_tiles(tile_obj);
+	initiate_tiles();
 	object.push_back(e1);
 	object.push_back(player);
-	Bullet* bullet;
-	// Bullet* bullet = new Bullet(player->collisionBox.x+player->collisionBox.w, player->collisionBox.y+10, "pbullet");
-	// object.push_back(bullet);
 	
 	
 	bool stopAnimation = true;
@@ -270,12 +278,6 @@ int main(int argc, char* args[]){
 						if(!BYPASS){
 							if(e.type == SDL_KEYDOWN && e.key.repeat==0){
 								player->handleMovement(e);
-								if(e.key.keysym.sym == SDLK_z){
-									// delete bullet; //doubt
-									Bullet* bullet = new Bullet(player->collisionBox.x+player->collisionBox.w, player->collisionBox.y+10, "pbullet", player->flipType);
-									// bullet = blt;
-									object.push_back(bullet);
-								}
 							}
 							else{
 								if(e.type == SDL_KEYUP){

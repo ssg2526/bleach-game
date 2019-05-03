@@ -1,4 +1,5 @@
 #include "Global.h"
+#include "Bullet.h"
 #include "Enemy.h"
 #include <cmath>
 #include <fstream>
@@ -15,7 +16,7 @@ Enemy::Enemy(float x, float y, int obj_code, std::string enemyname){
 	collisionBox.x = x;
 	collisionBox.y = y;
 	collisionBox.w = 75.0;
-	collisionBox.h = 98.0;	
+	collisionBox.h = 94.0;	
 	code = obj_code;
 	xPrevPos = x;
 	yPrevPos = y;
@@ -70,7 +71,6 @@ void Enemy::renderHealthBar(SDL_Rect fillHealth){
 	emptyHealth.w = barWidth*(1.0-percentHealth);
 	SDL_SetRenderDrawColor( gameRenderer, 255, 0, 0, 0xFF );
 	SDL_RenderFillRect(gameRenderer, &emptyHealth);
-	SDL_SetRenderDrawColor( gameRenderer, 0x00, 0x00, 0x00, 0xFF );
 }
 
 
@@ -85,33 +85,41 @@ void Enemy::render(float x, float y, SDL_Rect* clip, SDL_RendererFlip flipType){
 
 
 void Enemy::updatePos(SDL_Rect playerCollisionBox){
+	static int delay = 120;
 	xPrevPos = collisionBox.x;
 	yPrevPos = collisionBox.y;
 	yDelPos = ((-1*tempJvel*TIME_STEP + (0.5)*GRAVITY*TIME_STEP*TIME_STEP)*SCALE);
 	tempJvel = tempJvel - (GRAVITY*TIME_STEP);
 	// cout<<playerCollisionBox.x - collisionBox.x<<"	";
-	if((playerCollisionBox.x - collisionBox.x) > 300){
+	if((playerCollisionBox.x - collisionBox.x) > 500){
 		xDelPos = 0;/*(maxVel*TIME_STEP)*SCALE;*/
 		flipType = SDL_FLIP_NONE;
 	}
 	else{
-		if((playerCollisionBox.x - collisionBox.x) < -300){
+		if((playerCollisionBox.x - collisionBox.x) < -500){
 			xDelPos = 0/*-1*(maxVel*TIME_STEP)*SCALE*/;
 			flipType = SDL_FLIP_HORIZONTAL;
 		}
-		if((playerCollisionBox.x - collisionBox.x) < 300 && (playerCollisionBox.x - collisionBox.x) > 50){
+		if((playerCollisionBox.x - collisionBox.x) < 500 && (playerCollisionBox.x - collisionBox.x) > 200){
 			xDelPos = (maxVel*TIME_STEP)*SCALE;
 			flipType = SDL_FLIP_NONE;
 		}
-		if((playerCollisionBox.x - collisionBox.x) > -300 && (playerCollisionBox.x - collisionBox.x) < -50){
+		if((playerCollisionBox.x - collisionBox.x) > -500 && (playerCollisionBox.x - collisionBox.x) < -200){
 			xDelPos = -1*(maxVel*TIME_STEP)*SCALE;
 			flipType = SDL_FLIP_HORIZONTAL;
 		}
-		if((playerCollisionBox.x - collisionBox.x) > -50 && (playerCollisionBox.x - collisionBox.x) < 50){
+		if((playerCollisionBox.x - collisionBox.x) > -200 && (playerCollisionBox.x - collisionBox.x) < 200){
 			xDelPos = 0;
+			if(delay == 0){
+				// cout<<delay<<" ";
+				delay = 120;
+				Bullet* bullet = new Bullet(collisionBox.x+collisionBox.w, collisionBox.y+40, "ebullet", flipType);
+				object.push_back(bullet);
+			}
+			
 		}
 	}
-	
+	delay <= 0 ? 0 : delay--;
 	collisionBox.x += xDelPos;
 	collisionBox.y += yDelPos;
 	// cout<<collisionBox.y<<"		"<<yPrevPos<<endl;

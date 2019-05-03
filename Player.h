@@ -13,7 +13,10 @@ class Player : public GameObj{
 		void handleMovement(SDL_Event e);
 		void handleMovement(SDL_Event e, int button_released);
 		void updatePos();
+		void renderHealthBar();
+		void bulletHitPlayer(GameObj obj);
 		void playerHitStatic(GameObj object);
+		int health;
 		bool isCollidingBelow;
 		float xPrevPos;
 		float yPrevPos;

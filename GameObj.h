@@ -2,6 +2,7 @@
 #define GAMEOBJ_H
 #include <iostream>
 #include "Global.h"
+
 using namespace std;
 class GameObj{
 	public:
@@ -15,6 +16,7 @@ class GameObj{
 		virtual void playerHitStatic(GameObj object);
 		virtual void enemyHitStatic(GameObj object);
 		virtual void bulletHitEnemy(GameObj object);
+		virtual void bulletHitPlayer(GameObj object);
 		virtual void updatePos();
 		virtual void updatePos(SDL_Rect playerBox);
 		virtual void render(float x, float y, SDL_Rect* clip = NULL, SDL_RendererFlip flipType=SDL_FLIP_NONE);

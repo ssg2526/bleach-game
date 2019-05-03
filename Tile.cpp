@@ -16,14 +16,17 @@ Tile::Tile(float x, float y, int obj_code, string tile_type, string obj_name){
 	name = obj_name;
     code = obj_code;
     flipType = SDL_FLIP_NONE;
-    renderingClip = {772, 654, 60, 50};
+    // renderingClip = {772, 654, 60, 50};
 }
 
 
 void Tile::render(float x, float y, SDL_Rect* clip, SDL_RendererFlip flipType){
     SDL_Rect spriteRect = {(int)x, (int)y, 0, 0};
-	spriteRect.w = clip->w;
-	spriteRect.h = clip->h;
+	spriteRect.w = 60;
+	spriteRect.h = 50;
+	
+    // spriteRect.w = clip->w;
+	// spriteRect.h = clip->h;
     SDL_RenderCopyEx(gameRenderer, TileSheetTexture, clip, &spriteRect, 0, NULL, flipType);
 	// cout<<"s";
 }

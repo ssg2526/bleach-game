@@ -4,6 +4,9 @@
 #include <SDL2/SDL_image.h>
 #include <cstring>
 #include <vector>
+#include "GameObj.h"
+using namespace std;
+class GameObj;
 
 extern SDL_Renderer* gameRenderer;
 extern SDL_Texture* TileSheetTexture;
@@ -21,4 +24,5 @@ extern const float SECOND;
 extern const float EPSILON;
 extern const float SCALE;
 extern bool BYPASS;
+extern vector<GameObj*> object;
 #endif

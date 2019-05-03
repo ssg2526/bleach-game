@@ -1,7 +1,7 @@
+#include "GameObj.h"
 #include "Global.h"
 #include "Bullet.h"
 #include "Player.h"
-#include "GameObj.h"
 #include <cmath>
 #include <fstream>
 
@@ -15,6 +15,7 @@ Player::Player(){}
 Player::Player(float x, float y, int obj_code, string playername){
 	PlayerSheetTexture = NULL;
 	name = playername;
+	health = 100;
 	isCollidingBelow = false;
 	collisionBox.x = x;
 	collisionBox.y = y;
@@ -58,11 +59,32 @@ void Player::initializeClips(){
 	}
 }
 
+void Player::renderHealthBar(){
+	float percentHealth = health/100.0;
+	int barWidth = 300;
+	int barHeight = 15;
+	SDL_Rect emptyHealth, fillHealth;
+	SDL_SetRenderDrawColor( gameRenderer, 50, 205, 50, 255 );
+	fillHealth.x = 20;
+	fillHealth.y = 20;
+	fillHealth.w = barWidth*percentHealth;
+	fillHealth.h = barHeight;
+	SDL_RenderFillRect(gameRenderer, &fillHealth);
+	SDL_SetRenderDrawColor(gameRenderer, 255, 0, 0, 255);
+	emptyHealth.x = fillHealth.x+fillHealth.w;
+	emptyHealth.y = fillHealth.y;
+	emptyHealth.w = barWidth*(1.0-percentHealth);
+	emptyHealth.h = barHeight;
+	SDL_RenderFillRect(gameRenderer, &emptyHealth);
+
+}
+
 void Player::render(float x, float y, SDL_Rect* clip, SDL_RendererFlip flipType){
 	SDL_Rect spriteRect = {(int)x, (int)y, 0, 0};
 	spriteRect.w = clip->w;
 	spriteRect.h = clip->h;
 	SDL_RenderCopyEx(gameRenderer, PlayerSheetTexture, clip, &spriteRect, 0, NULL, flipType);
+	renderHealthBar();
 }
 
 void Player::handleMovement(SDL_Event e){
@@ -95,8 +117,8 @@ void Player::handleMovement(SDL_Event e){
 		break;
 		case SDLK_z:
 			xDelPos = 0;
-			// Bullet* bullet = new Bullet(collisionBox.x+collisionBox.w, collisionBox.y+10, "pbullet", flipType);
-			// object.push_back(bullet);
+			Bullet* bullet = new Bullet(collisionBox.x+collisionBox.w, collisionBox.y+10, "pbullet", flipType);
+			object.push_back(bullet);
 			BYPASS = true;
 			// animate("shoot");
 			// Bullet bullet(collisionBox.x+collisionBox.w, collisionBox.y+collisionBox.h/4);
@@ -188,6 +210,10 @@ void Player::playerHitStatic(GameObj object){
 			}
 		}
 	}
+}
+
+void Player::bulletHitPlayer(GameObj obj){
+	health -= 1;
 }
 
 void Player::animate(string act){
