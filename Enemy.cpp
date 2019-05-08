@@ -85,12 +85,17 @@ void Enemy::render(float x, float y, SDL_Rect* clip, SDL_RendererFlip flipType){
 
 
 void Enemy::updatePos(SDL_Rect playerCollisionBox){
-	static int delay = 120;
+	static int delay = 150;
 	xPrevPos = collisionBox.x;
 	yPrevPos = collisionBox.y;
 	yDelPos = ((-1*tempJvel*TIME_STEP + (0.5)*GRAVITY*TIME_STEP*TIME_STEP)*SCALE);
 	tempJvel = tempJvel - (GRAVITY*TIME_STEP);
 	// cout<<playerCollisionBox.x - collisionBox.x<<"	";
+	if(playerCollisionBox.x > collisionBox.x){
+		flipType = SDL_FLIP_NONE;
+	}else{
+		flipType = SDL_FLIP_HORIZONTAL;
+	}
 	if((playerCollisionBox.x - collisionBox.x) > 500){
 		xDelPos = 0;/*(maxVel*TIME_STEP)*SCALE;*/
 		flipType = SDL_FLIP_NONE;
@@ -98,21 +103,17 @@ void Enemy::updatePos(SDL_Rect playerCollisionBox){
 	else{
 		if((playerCollisionBox.x - collisionBox.x) < -500){
 			xDelPos = 0/*-1*(maxVel*TIME_STEP)*SCALE*/;
-			flipType = SDL_FLIP_HORIZONTAL;
 		}
-		if((playerCollisionBox.x - collisionBox.x) < 500 && (playerCollisionBox.x - collisionBox.x) > 200){
+		if((playerCollisionBox.x - collisionBox.x) < 500 && (playerCollisionBox.x - collisionBox.x) > 350){
 			xDelPos = (maxVel*TIME_STEP)*SCALE;
-			flipType = SDL_FLIP_NONE;
 		}
-		if((playerCollisionBox.x - collisionBox.x) > -500 && (playerCollisionBox.x - collisionBox.x) < -200){
+		if((playerCollisionBox.x - collisionBox.x) > -500 && (playerCollisionBox.x - collisionBox.x) < -350){
 			xDelPos = -1*(maxVel*TIME_STEP)*SCALE;
-			flipType = SDL_FLIP_HORIZONTAL;
 		}
-		if((playerCollisionBox.x - collisionBox.x) > -200 && (playerCollisionBox.x - collisionBox.x) < 200){
+		if((playerCollisionBox.x - collisionBox.x) > -350 && (playerCollisionBox.x - collisionBox.x) < 350){
 			xDelPos = 0;
 			if(delay == 0){
-				// cout<<delay<<" ";
-				delay = 120;
+				delay = 150;
 				Bullet* bullet = new Bullet(collisionBox.x+collisionBox.w, collisionBox.y+40, "ebullet", flipType);
 				object.push_back(bullet);
 			}

@@ -19,8 +19,8 @@ Player::Player(float x, float y, int obj_code, string playername){
 	isCollidingBelow = false;
 	collisionBox.x = x;
 	collisionBox.y = y;
-	collisionBox.w = 50.0;
-	collisionBox.h = 48.0;	
+	collisionBox.w = 70.0;
+	collisionBox.h = 60.0;	
 	code = obj_code;
 	xPrevPos = x;
 	yPrevPos = y;
@@ -115,6 +115,14 @@ void Player::handleMovement(SDL_Event e){
 		case SDLK_DOWN:
 		
 		break;
+		case SDLK_x:
+			xDelPos = 0;
+			animate("blink");
+			BYPASS = true;
+			// animate("shoot");
+			// Bullet bullet(collisionBox.x+collisionBox.w, collisionBox.y+collisionBox.h/4);
+		break;
+
 		case SDLK_z:
 			xDelPos = 0;
 			Bullet* bullet = new Bullet(collisionBox.x+collisionBox.w, collisionBox.y+10, "pbullet", flipType);
@@ -123,6 +131,7 @@ void Player::handleMovement(SDL_Event e){
 			// animate("shoot");
 			// Bullet bullet(collisionBox.x+collisionBox.w, collisionBox.y+collisionBox.h/4);
 		break;
+		
 		
 	}
 }
@@ -151,6 +160,7 @@ void Player::handleMovement(SDL_Event e, int button_released){
 }
 
 void Player::updatePos(){
+	static string prev;
 	xPrevPos = collisionBox.x;
 	yPrevPos = collisionBox.y;
 	yDelPos = ((-1*tempJvel*TIME_STEP + (0.5)*GRAVITY*TIME_STEP*TIME_STEP)*SCALE);
@@ -169,6 +179,9 @@ void Player::updatePos(){
 
 	if(BYPASS){
 			animate("shoot");
+			// prev = "shoot";
+			// animate("damage");
+
 	}
 	else if(abs(xDelPos)>=EPSILON && isCollidingBelow==true){
 		animate("run");
@@ -176,6 +189,7 @@ void Player::updatePos(){
 	
 	else{
 		// if(isCollidingBelow == true){
+			// if(!)
 			animate("stand");
 		// }
 		// else{
@@ -183,6 +197,11 @@ void Player::updatePos(){
 		// }
 	}
 	// isCollidingBelow = false;
+}
+
+void Player::updatePos(int x, int y){
+	collisionBox.x = x;
+	collisionBox.y = y;
 }
 
 void Player::playerHitStatic(GameObj object){
@@ -214,6 +233,8 @@ void Player::playerHitStatic(GameObj object){
 
 void Player::bulletHitPlayer(GameObj obj){
 	health -= 1;
+	animate("damage");
+	BYPASS = true;
 }
 
 void Player::animate(string act){
@@ -229,9 +250,9 @@ void Player::animate(string act){
 	else if(act == "shoot"){
 		// i=0;
 		// cout<<11+i/4<<" ";
-		renderingClip = run[12+i/5];
+		renderingClip = run[12+i/4];
 		i++;
-		if(i>=15){
+		if(i>=12){
 			i=0;
 			BYPASS = false;
 			// Bullet bullet(collisionBox.x + collisionBox.w, collisionBox.y+20);
@@ -244,6 +265,33 @@ void Player::animate(string act){
 		// if(i>40){
 		// 	i=0;
 		// }
+	}
+	else if(act == "damage"){
+		// i = 0;
+		renderingClip = run[15+i/4];
+		i++;
+		if(i==4){
+			i=0;
+			BYPASS = false;
+		}
+	}
+	
+	else if(act == "blink"){
+		// i=0;
+		renderingClip = run[17+i/10];
+		i++;
+		if(i==20){
+			i=0;
+		}
+		if(flipType == SDL_FLIP_HORIZONTAL){
+			updatePos(collisionBox.x-200, collisionBox.y);
+		}
+		else
+		{
+			updatePos(collisionBox.x+200, collisionBox.y);
+		}
+		
+
 	}
 	
 	// else if(act == "jump"){

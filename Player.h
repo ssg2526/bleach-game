@@ -13,6 +13,7 @@ class Player : public GameObj{
 		void handleMovement(SDL_Event e);
 		void handleMovement(SDL_Event e, int button_released);
 		void updatePos();
+		void updatePos(int x, int y);
 		void renderHealthBar();
 		void bulletHitPlayer(GameObj obj);
 		void playerHitStatic(GameObj object);
@@ -32,6 +33,7 @@ class Player : public GameObj{
 		// SDL_Rect renderingClip;
 		SDL_Rect camera;
 		void initializeClips();
+		string prevAnim;
 		void animate(string act);
 		// void animateStand(bool anim);
 

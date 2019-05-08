@@ -110,7 +110,7 @@ bool loadMedia()
 	bool success = true;
 
 	//Load sprite sheet textureTIME_STEP
-	if(!loadFromFile("sprites_folder/ichigo3.png", "player")){
+	if(!loadFromFile("sprites_folder/ichigo4.png", "player")){
 		success = false;
 	}
 	if(!loadFromFile("sprites_folder/enemy1.png", "enemy")){
@@ -248,9 +248,11 @@ int main(int argc, char* args[]){
 	
 	Player* player = new Player(200, 400, 1, "player");
 	Enemy* e1 = new Enemy(950 ,250, -1, "e1");
+	Enemy* e2 = new Enemy(600 ,250, -1, "e1");
 	CollisionDetector c_detector;// = new CollisionDetector();
 	initiate_tiles();
 	object.push_back(e1);
+	object.push_back(e2);
 	object.push_back(player);
 	
 	
