@@ -118,7 +118,8 @@ void Player::handleMovement(SDL_Event e){
 		case SDLK_x:
 			xDelPos = 0;
 			animate("blink");
-			BYPASS = true;
+			// BYPASS = true;
+			BYPASS = false;
 			// animate("shoot");
 			// Bullet bullet(collisionBox.x+collisionBox.w, collisionBox.y+collisionBox.h/4);
 		break;
@@ -127,7 +128,7 @@ void Player::handleMovement(SDL_Event e){
 			xDelPos = 0;
 			Bullet* bullet = new Bullet(collisionBox.x+collisionBox.w, collisionBox.y+10, "pbullet", flipType);
 			object.push_back(bullet);
-			BYPASS = true;
+			BYPASS = false;
 			// animate("shoot");
 			// Bullet bullet(collisionBox.x+collisionBox.w, collisionBox.y+collisionBox.h/4);
 		break;

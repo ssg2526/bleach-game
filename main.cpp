@@ -182,14 +182,25 @@ void initiate_tiles(){
 	}
 }
 
-
-void render_world(SDL_Rect playerBox){
-	// SDL_SetRenderDrawColor( gameRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-	SDL_SetRenderDrawColor( gameRenderer, 0, 0, 0, 255 );
-	SDL_RenderClear( gameRenderer );
-	SDL_SetRenderDrawColor( gameRenderer, 255, 255, 255, 255 );	
-	// SDL_SetRenderDrawColor( gameRenderer, 0x00, 0x00, 0x00, 0xFF );
-	camera.x = (playerBox.x+playerBox.w/2)-SCREEN_WIDTH*3.0/5;
+void updateCam(Player* player){
+	int frontDiff = (player->collisionBox.x+player->collisionBox.w/2) - SCREEN_WIDTH*3.0/5;
+	int backDiff = (player->collisionBox.x+player->collisionBox.w/2) - SCREEN_WIDTH*1.5/5;
+	if(frontDiff - camera.x >= 0){
+		if(frontDiff - camera.x < 10){
+			camera.x = frontDiff;
+		}
+		else{
+			camera.x += player->maxVel*4;
+		}
+	}
+	if(backDiff - camera.x <= 0){
+		if(backDiff - camera.x > -10){
+			camera.x = backDiff;
+		}
+		else{
+			camera.x -= player->maxVel*4;
+		}
+	}
 	camera.y = 0;
 	if( camera.x < 0 )
 	{ 
@@ -198,9 +209,15 @@ void render_world(SDL_Rect playerBox){
 	if(camera.x + SCREEN_WIDTH > LEVEL_WIDTH){
 		camera.x = LEVEL_WIDTH - SCREEN_WIDTH;
 	}
-	// for(int i=0; i<1000; i++){
+}
 
-	// }
+void render_world(Player* player){
+	// SDL_SetRenderDrawColor( gameRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+	SDL_SetRenderDrawColor( gameRenderer, 0, 0, 0, 255 );
+	SDL_RenderClear( gameRenderer );
+	SDL_SetRenderDrawColor( gameRenderer, 255, 255, 255, 255 );	
+	// SDL_SetRenderDrawColor( gameRenderer, 0x00, 0x00, 0x00, 0xFF );
+	updateCam(player);
 	SDL_Rect rect= {900, 50, 120, 120};
 	SDL_Rect clip = {336, 351, 400, 400};
 	SDL_RenderCopy(gameRenderer, MoonTexture, &clip, &rect);
@@ -216,7 +233,7 @@ void render_world(SDL_Rect playerBox){
 	}
 }
 
-void update_world(SDL_Rect playerBox){
+void update_world(Player* player){
 	for(int i=0; i<object.size(); i++){
 		if(object[i]->name != "ground"){
 			if(object[i]->name == "e1"){
@@ -226,7 +243,7 @@ void update_world(SDL_Rect playerBox){
 					object.erase(object.begin()+i);
 					continue;
 				}
-				object[i]->updatePos(playerBox);
+				object[i]->updatePos(player->collisionBox);
 			}
 			else{
 				if(object[i]->name == "pbullet"){
@@ -249,12 +266,11 @@ int main(int argc, char* args[]){
 	Player* player = new Player(200, 400, 1, "player");
 	Enemy* e1 = new Enemy(950 ,250, -1, "e1");
 	Enemy* e2 = new Enemy(600 ,250, -1, "e1");
-	CollisionDetector c_detector;// = new CollisionDetector();
+	CollisionDetector c_detector;
 	initiate_tiles();
 	object.push_back(e1);
 	object.push_back(e2);
 	object.push_back(player);
-	
 	
 	bool stopAnimation = true;
 	int i=0;
@@ -291,11 +307,11 @@ int main(int argc, char* args[]){
 					}
 				}
 
-				update_world(player->collisionBox);
+				update_world(player);
 
 				c_detector.checkCollision(object);
 
-				render_world(player->collisionBox);
+				render_world(player);
 
 
 				SDL_RenderPresent( gameRenderer );
