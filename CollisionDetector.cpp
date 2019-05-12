@@ -4,11 +4,6 @@
 using namespace std;
 
 CollisionDetector::CollisionDetector(){}
-
-// CollisionDetector::~CollisionDetector(){
-// 	
-// }
-
 void CollisionDetector::checkCollision(vector<GameObj*> &object){
 	for(int i=0; i<object.size(); i++){
 		for(int j=0; j<object.size() && j!=i; j++){

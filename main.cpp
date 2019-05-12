@@ -22,12 +22,17 @@ const float EPSILON = .1;
 const float SCALE = 100.0;
 bool BYPASS = false;
 
+Mix_Music *gMusic = NULL; //The sound effects that will be used 
+Mix_Chunk *gScratch = NULL; 
+Mix_Chunk *gHigh = NULL; 
+Mix_Chunk *gMedium = NULL; 
+Mix_Chunk *gLow = NULL;
+
 SDL_Window* gWindow = NULL;
 SDL_Texture* EnemySheetTexture = NULL;
 SDL_Texture* PlayerSheetTexture = NULL;
 SDL_Texture* TileSheetTexture = NULL;
 SDL_Texture* MoonTexture = NULL;
-
 SDL_Rect camera = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 
 
@@ -40,7 +45,7 @@ vector<GameObj*> object;
 
 bool init(){
 	bool success = true;
-	if(SDL_Init(SDL_INIT_VIDEO)<0){
+	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)<0){
 		cout<<"couldn't initialize SDL";
 		success = false;
 	}
@@ -66,6 +71,10 @@ bool init(){
 					cout<<"SDL image could not be initialized";
 					success = false;
 				}
+
+				if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 ){ 
+					printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() ); success = false; 
+				}
 			}
 		}
 	}
@@ -78,7 +87,10 @@ bool loadFromFile(string path, string name){
 	SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, 0, 0xFF, 0xFF ) );
 	newTexture = SDL_CreateTextureFromSurface(gameRenderer, loadedSurface);
 	SDL_FreeSurface(loadedSurface);
+
 	
+
+
 	if(name == "enemy"){
 		EnemySheetTexture = newTexture;
 		newTexture = NULL;
@@ -109,6 +121,19 @@ bool loadMedia()
 	//Loading success flag
 	bool success = true;
 
+	gMusic = Mix_LoadMUS( "bleach.mp3" ); 
+	if( gMusic == NULL ) { 
+		printf( "Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError() ); 
+		// success = false
+		success = false; 
+	}
+
+	gHigh = Mix_LoadWAV( "high.wav" ); 
+	if( gHigh == NULL ) {
+		printf( "Failed to load high sound effect! SDL_mixer Error: %s\n", Mix_GetError() ); 
+		success = false; 
+	}
+
 	//Load sprite sheet textureTIME_STEP
 	if(!loadFromFile("sprites_folder/ichigo4.png", "player")){
 		success = false;
@@ -130,6 +155,11 @@ void close(Player* player)
 {
 	//Free loaded images
 
+	Mix_FreeChunk( gHigh );
+	gHigh = NULL;
+	//Free the music 
+	Mix_FreeMusic( gMusic ); 
+	gMusic = NULL;
 	//Destroy window
 	// SDL_DestroyTexture(player->PlayerSheetTexture);	
 	SDL_DestroyRenderer( gameRenderer );
@@ -138,6 +168,7 @@ void close(Player* player)
 	gameRenderer = NULL;
 
 	//Quit SDL subsystems
+	Mix_Quit();
 	IMG_Quit();
 	SDL_Quit();
 }
@@ -287,8 +318,7 @@ int main(int argc, char* args[]){
 			int ct=0;
 			
 			while(!quit){
-				while(SDL_PollEvent(&e)!=0){
-					
+				while(SDL_PollEvent(&e)!=0){					
 					if(e.type == SDL_QUIT){
 						quit = true;
 					}
@@ -296,6 +326,13 @@ int main(int argc, char* args[]){
 						if(!BYPASS){
 							if(e.type == SDL_KEYDOWN && e.key.repeat==0){
 								player->handleMovement(e);
+
+								if(e.key.keysym.sym == SDLK_1){
+									Mix_PlayChannel(-1, gHigh, 0);
+								}
+								if(e.key.keysym.sym == SDLK_9){
+									Mix_PlayMusic( gMusic, -1 );
+								}
 							}
 							else{
 								if(e.type == SDL_KEYUP){

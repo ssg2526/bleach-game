@@ -235,7 +235,7 @@ void Player::playerHitStatic(GameObj object){
 void Player::bulletHitPlayer(GameObj obj){
 	health -= 1;
 	animate("damage");
-	BYPASS = true;
+	BYPASS = false;
 }
 
 void Player::animate(string act){
