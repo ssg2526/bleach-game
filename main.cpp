@@ -11,15 +11,15 @@
 #include "Bullet.h"
 #include "CollisionDetector.h"
 using namespace std;
-const float FREQUENCY = 60.0;
-const float TIME_STEP = 1.0/FREQUENCY;
+const double FREQUENCY = 60.0;
+const double TIME_STEP = 1.0/FREQUENCY;
 const int SCREEN_WIDTH = 1200;
 const int LEVEL_WIDTH = 2880;
 const int LEVEL_HEIGHT = 700;
 const int SCREEN_HEIGHT = 700;
-const float SECOND = 1000000.0;
-const float EPSILON = .1;
-const float SCALE = 100.0;
+const double SECOND = 1000000.0;
+const double EPSILON = 0.1;
+const double SCALE = 100.0;
 bool BYPASS = false;
 
 Mix_Music *gMusic = NULL; //The sound effects that will be used 
@@ -292,6 +292,12 @@ void update_world(Player* player){
 	}
 }
 
+// void setRenderingClip(){
+// 	for(int i=0; i<object.size(); i++){
+// 		object[i]->renderingClip();
+// 	}
+// }
+
 int main(int argc, char* args[]){
 	
 	Player* player = new Player(200, 400, 1, "player");
@@ -348,8 +354,9 @@ int main(int argc, char* args[]){
 
 				c_detector.checkCollision(object);
 
-				render_world(player);
+				// setRenderingClip();
 
+				render_world(player);
 
 				SDL_RenderPresent( gameRenderer );
 				usleep(SECOND*TIME_STEP);

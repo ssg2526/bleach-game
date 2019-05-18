@@ -30,7 +30,7 @@ class Enemy : public GameObj{
 		// SDL_Rect renderingClip;
 		//SDL_Rect camera;
 		void initializeClips();
-		void bulletHitEnemy(GameObj obj);
+		void bulletHitEnemy(GameObj object);
 		void animateRun(bool anim);
 };
 #endif

@@ -14,10 +14,10 @@ Bullet::Bullet(float x, float y, string obj_name, SDL_RendererFlip flip){
 	collisionBox.w = 16.0;
 	collisionBox.h = 10.0;
 	if(flip == SDL_FLIP_NONE){
-		maxVel = 10;	
+		maxVel = 6;	
 	}
 	else{
-		maxVel = -10;
+		maxVel = -6;
 	}
 }
 

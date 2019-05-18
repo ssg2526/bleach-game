@@ -23,11 +23,15 @@ void CollisionDetector::checkCollision(vector<GameObj*> &object){
 						if((*object[i]).name=="pbullet"){
 							if((*object[j]).name=="e1"){
 								(*object[j]).bulletHitEnemy(*object[i]);
+								delete object[i];
+								object.erase(object.begin()+i);
 							}
 						}
 						if((*object[i]).name=="ebullet"){
 							if((*object[j]).name=="player"){
 								(*object[j]).bulletHitPlayer(*object[i]);
+								delete object[i];
+								object.erase(object.begin()+i);
 							}
 						}
 					}

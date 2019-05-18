@@ -6,9 +6,12 @@
 #include <fstream>
 
 using namespace std;
-
+static int cn = 0;
+vector<string> keys;
+string prevAct;
+string prevKeyPress;
 SDL_Renderer* gameRenderer;
-const float GRAVITY = 9.81;
+const double GRAVITY = 9.81;
 
 Player::Player(){}
 
@@ -50,12 +53,6 @@ void Player::initializeClips(){
 		in>>act;
 		in>> box.x >> box.y >> box.w >> box.h;
 		run.push_back(box);
-		// if(act == "run"){
-		// 	run.push_back(box);
-		// }
-		// if(act=="stand"){
-		// 	run.push_back(box);
-		// }
 	}
 }
 
@@ -92,45 +89,47 @@ void Player::handleMovement(SDL_Event e){
 		case SDLK_LEFT:
 			xDelPos -= (maxVel*TIME_STEP)*SCALE;
 			flipType = SDL_FLIP_HORIZONTAL;
-			//animateRun(true);
-			//cout<<xDelPos<<" ";
+			prevKeyPress = "LD";
+			keys.push_back(prevKeyPress);
 		break;
 
 		case SDLK_RIGHT:
 			xDelPos += (maxVel*TIME_STEP)*SCALE;
 			flipType = SDL_FLIP_NONE;
-			//animateRun(true);
-			
+			prevKeyPress = "RD";
+			keys.push_back(prevKeyPress);
 		break;
 
 		case SDLK_UP:
 			if(jumpCount<2){
 				tempJvel = jumpVel;
 				jumpCount++;
-				//animateRun(false);
 			}
-			 
+			cn=0;
+			prevKeyPress = "UD";
+			keys.push_back(prevKeyPress);			 
 		break;
 
 		case SDLK_DOWN:
-		
+			prevKeyPress = "DD";
+			keys.push_back(prevKeyPress);		
 		break;
 		case SDLK_x:
-			xDelPos = 0;
 			animate("blink");
+			prevKeyPress = "XD";
+			keys.push_back(prevKeyPress);
 			// BYPASS = true;
-			BYPASS = false;
-			// animate("shoot");
-			// Bullet bullet(collisionBox.x+collisionBox.w, collisionBox.y+collisionBox.h/4);
 		break;
 
 		case SDLK_z:
-			xDelPos = 0;
 			Bullet* bullet = new Bullet(collisionBox.x+collisionBox.w, collisionBox.y+10, "pbullet", flipType);
 			object.push_back(bullet);
-			BYPASS = false;
-			// animate("shoot");
-			// Bullet bullet(collisionBox.x+collisionBox.w, collisionBox.y+collisionBox.h/4);
+			BYPASS = true;
+			animate("shoot");
+			prevKeyPress = "ZD";
+			keys.push_back(prevKeyPress);
+			xDelPos = 0;
+			cn=0;
 		break;
 		
 		
@@ -141,6 +140,7 @@ void Player::handleMovement(SDL_Event e, int button_released){
 	switch(e.key.keysym.sym){
 		case SDLK_LEFT:
 			// xDelPos += (maxVel*TIME_STEP)*SCALE;
+
 			xDelPos = 0;
 		break;
 
@@ -156,53 +156,24 @@ void Player::handleMovement(SDL_Event e, int button_released){
 		case SDLK_DOWN:
 		
 		break;
+		case SDLK_x:
+			if(flipType == SDL_FLIP_HORIZONTAL){
+				updatePos(collisionBox.x-200, collisionBox.y);
+			}
+			else{
+				updatePos(collisionBox.x+200, collisionBox.y);
+			}
+		break;
+		case SDLK_z:
+			if(prevKeyPress == "RD"){
+				xDelPos += (maxVel*TIME_STEP)*SCALE;
+			}
+			else if(prevKeyPress == "LD"){
+				xDelPos -= (maxVel*TIME_STEP)*SCALE;
+			}
+		break;
 		
 	}
-}
-
-void Player::updatePos(){
-	static string prev;
-	xPrevPos = collisionBox.x;
-	yPrevPos = collisionBox.y;
-	yDelPos = ((-1*tempJvel*TIME_STEP + (0.5)*GRAVITY*TIME_STEP*TIME_STEP)*SCALE);
-	tempJvel = tempJvel - (GRAVITY*TIME_STEP);
-	collisionBox.x += xDelPos;
-	collisionBox.y += yDelPos;
-	// collisionBox.w = renderingClip.w;
-	// collisionBox.h = renderingClip.h;
-	if(collisionBox.x+collisionBox.w > LEVEL_WIDTH){
-		collisionBox.x = LEVEL_WIDTH-collisionBox.w;
-	}
-	else if(collisionBox.x < 0){
-		collisionBox.x = 0;
-	}
-	// cout<<collisionBox.y<<"		"<<yPrevPos<<endl;
-
-	if(BYPASS){
-			animate("shoot");
-			// prev = "shoot";
-			// animate("damage");
-
-	}
-	else if(abs(xDelPos)>=EPSILON && isCollidingBelow==true){
-		animate("run");
-	}
-	
-	else{
-		// if(isCollidingBelow == true){
-			// if(!)
-			animate("stand");
-		// }
-		// else{
-		// 	animate("jump");
-		// }
-	}
-	// isCollidingBelow = false;
-}
-
-void Player::updatePos(int x, int y){
-	collisionBox.x = x;
-	collisionBox.y = y;
 }
 
 void Player::playerHitStatic(GameObj object){
@@ -212,7 +183,6 @@ void Player::playerHitStatic(GameObj object){
 		tempJvel = 0;
 		jumpCount = 0;
 		isCollidingBelow = true;
-		// cout<<"b";
 	}
 	else{
 		if(xPrevPos + collisionBox.w <= (object).collisionBox.x){
@@ -232,78 +202,112 @@ void Player::playerHitStatic(GameObj object){
 	}
 }
 
+//===========================OVERRIDEN updatePos()==================================//
+void Player::updatePos(int x, int y){
+	collisionBox.x = x;
+	collisionBox.y = y;
+}
+//====================================END===========================================//
+
+
+//========================UPDATE POSITION GENERAL===================================//
+void Player::updatePos(){
+	static string prev;
+	xPrevPos = collisionBox.x;
+	yPrevPos = collisionBox.y;
+	yDelPos = ((-1*tempJvel*TIME_STEP + (0.5)*GRAVITY*TIME_STEP*TIME_STEP)*SCALE);
+	tempJvel = tempJvel - (GRAVITY*TIME_STEP);
+	collisionBox.x += xDelPos;
+	collisionBox.y += yDelPos;
+	if(collisionBox.x+collisionBox.w > LEVEL_WIDTH){
+		collisionBox.x = LEVEL_WIDTH-collisionBox.w;
+	}
+	else if(collisionBox.x < 0){
+		collisionBox.x = 0;
+	}
+
+	//*********SETTING ANIMATION ACTIONS********//
+	if(BYPASS){
+		animate(prevAct);
+	}
+	else if(abs(xDelPos)>=EPSILON && abs(tempJvel)<=0.85){
+		animate("run");
+	}
+	else{
+		if(abs(xDelPos)<=EPSILON && abs(tempJvel)<=0.85){
+			animate("stand");
+		}
+		else{
+
+			animate("jump");
+		}
+	}
+	isCollidingBelow = false;
+}
+//===================================END===================================================//
+
 void Player::bulletHitPlayer(GameObj obj){
 	health -= 1;
 	animate("damage");
-	BYPASS = false;
+	cn=0;
+	BYPASS = true;
 }
 
 void Player::animate(string act){
-	static int i=0;
+	// static int i=0;
 	if(act == "run"){
-		renderingClip = run[i/5];
-		// cout<<i<<" ";
-		i++;
-		if(i==20){
-			i=0;
+		renderingClip = run[cn/5];
+		cn++;
+		if(cn==20){
+			cn=0;
 		}
+		prevAct = "run";
 	}
 	else if(act == "shoot"){
-		// i=0;
-		// cout<<11+i/4<<" ";
-		renderingClip = run[12+i/4];
-		i++;
-		if(i>=12){
-			i=0;
+		renderingClip = run[14+cn/4];
+		cn++;
+		if(cn>=8){
+			cn=0;
 			BYPASS = false;
-			// Bullet bullet(collisionBox.x + collisionBox.w, collisionBox.y+20);
 		}
+		prevAct = "shoot";
 	}
 	else if(act == "stand"){
 		renderingClip = run[5];
-		// i++;
-		// collisionBox.h = renderingClip.h;
-		// if(i>40){
-		// 	i=0;
-		// }
+		prevAct = "stand";
 	}
 	else if(act == "damage"){
-		// i = 0;
-		renderingClip = run[15+i/4];
-		i++;
-		if(i==4){
-			i=0;
+		renderingClip = run[13+cn/10];
+		cn++;
+		if(cn==10){
+			cn=0;
 			BYPASS = false;
 		}
+		prevAct = "damage";
 	}
 	
-	else if(act == "blink"){
-		// i=0;
-		renderingClip = run[17+i/10];
-		i++;
-		if(i==20){
-			i=0;
-		}
-		if(flipType == SDL_FLIP_HORIZONTAL){
-			updatePos(collisionBox.x-200, collisionBox.y);
-		}
-		else
-		{
-			updatePos(collisionBox.x+200, collisionBox.y);
-		}
-		
-
-	}
-	
-	// else if(act == "jump"){
-	// 	i=5;
-	// 	renderingClip = run[i/4];
-	// 	//cout<<i<<endl;
-	// 	i++;
-	// 	if(i==16){
-	// 		i=5;
+	// else if(act == "blink"){
+	// 	renderingClip = run[16+cn/1];
+	// 	cn++;
+	// 	if(cn==2){
+	// 		cn=0;
+	// 		BYPASS = false;
 	// 	}
+	// 	prevAct = "blink";		
+
 	// }
+	
+	else if(act == "jump"){
+		if(tempJvel>0 && abs(xDelPos)>=EPSILON){
+			renderingClip = run[6];
+		}
+		else if(tempJvel>0 && abs(xDelPos)<=EPSILON){
+			renderingClip = run[7];
+		}
+		else if(tempJvel < 0){
+			renderingClip = run[9];
+		}
+	}
 	
 }
 

@@ -18,12 +18,12 @@ extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;
 extern const int LEVEL_WIDTH;
 extern const int LEVEL_HEIGHT;
-extern const float GRAVITY;
-extern const float FREQUENCY;
-extern const float TIME_STEP;
-extern const float SECOND;
-extern const float EPSILON;
-extern const float SCALE;
+extern const double GRAVITY;
+extern const double FREQUENCY;
+extern const double TIME_STEP;
+extern const double SECOND;
+extern const double EPSILON;
+extern const double SCALE;
 extern bool BYPASS;
 extern vector<GameObj*> object;
 #endif

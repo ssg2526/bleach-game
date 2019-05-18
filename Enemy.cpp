@@ -164,8 +164,8 @@ void Enemy::enemyHitStatic(GameObj object){
 	}
 }
 
-void Enemy::bulletHitEnemy(GameObj obj){
-	health -= 5;
+void Enemy::bulletHitEnemy(GameObj object){
+	health -= 35;
 }
 
 
