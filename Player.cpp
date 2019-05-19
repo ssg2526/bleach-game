@@ -22,7 +22,7 @@ Player::Player(float x, float y, int obj_code, string playername){
 	isCollidingBelow = false;
 	collisionBox.x = x;
 	collisionBox.y = y;
-	collisionBox.w = 70.0;
+	collisionBox.w = 40.0;
 	collisionBox.h = 60.0;	
 	code = obj_code;
 	xPrevPos = x;
@@ -80,6 +80,13 @@ void Player::render(float x, float y, SDL_Rect* clip, SDL_RendererFlip flipType)
 	SDL_Rect spriteRect = {(int)x, (int)y, 0, 0};
 	spriteRect.w = clip->w;
 	spriteRect.h = clip->h;
+	if(flipType == SDL_FLIP_NONE){
+		spriteRect.x = x-20;
+	}
+	else{
+		spriteRect.x = x-20;
+	}
+	// SDL_RenderDrawRect(gameRenderer, &collisionBox);
 	SDL_RenderCopyEx(gameRenderer, PlayerSheetTexture, clip, &spriteRect, 0, NULL, flipType);
 	renderHealthBar();
 }
@@ -115,7 +122,7 @@ void Player::handleMovement(SDL_Event e){
 			keys.push_back(prevKeyPress);		
 		break;
 		case SDLK_x:
-			animate("blink");
+			// animate("blink");
 			prevKeyPress = "XD";
 			keys.push_back(prevKeyPress);
 			// BYPASS = true;
@@ -125,8 +132,8 @@ void Player::handleMovement(SDL_Event e){
 			Bullet* bullet = new Bullet(collisionBox.x+collisionBox.w, collisionBox.y+10, "pbullet", flipType);
 			object.push_back(bullet);
 			BYPASS = true;
-			animate("shoot");
 			prevKeyPress = "ZD";
+			prevAct = "shoot";
 			keys.push_back(prevKeyPress);
 			xDelPos = 0;
 			cn=0;
@@ -165,12 +172,7 @@ void Player::handleMovement(SDL_Event e, int button_released){
 			}
 		break;
 		case SDLK_z:
-			if(prevKeyPress == "RD"){
-				xDelPos += (maxVel*TIME_STEP)*SCALE;
-			}
-			else if(prevKeyPress == "LD"){
-				xDelPos -= (maxVel*TIME_STEP)*SCALE;
-			}
+			
 		break;
 		
 	}
@@ -219,6 +221,7 @@ void Player::updatePos(){
 	tempJvel = tempJvel - (GRAVITY*TIME_STEP);
 	collisionBox.x += xDelPos;
 	collisionBox.y += yDelPos;
+	
 	if(collisionBox.x+collisionBox.w > LEVEL_WIDTH){
 		collisionBox.x = LEVEL_WIDTH-collisionBox.w;
 	}
@@ -248,7 +251,7 @@ void Player::updatePos(){
 
 void Player::bulletHitPlayer(GameObj obj){
 	health -= 1;
-	animate("damage");
+	prevAct = "damage";
 	cn=0;
 	BYPASS = true;
 }

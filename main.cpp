@@ -21,6 +21,7 @@ const double SECOND = 1000000.0;
 const double EPSILON = 0.1;
 const double SCALE = 100.0;
 bool BYPASS = false;
+bool PAUSE = false;
 
 Mix_Music *gMusic = NULL; //The sound effects that will be used 
 Mix_Chunk *gScratch = NULL; 
@@ -34,8 +35,8 @@ SDL_Texture* PlayerSheetTexture = NULL;
 SDL_Texture* TileSheetTexture = NULL;
 SDL_Texture* MoonTexture = NULL;
 SDL_Rect camera = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-
-
+SDL_Rect menu_screen = {50, 50, SCREEN_WIDTH/4, SCREEN_HEIGHT/4};
+// SDL_RenderSetViewport(gameRenderer, &menu_screen );
 bool init();
 
 bool loadMedia();
@@ -61,6 +62,9 @@ bool init(){
 		}
 		else{
 			gameRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+			// SDL_RenderSetViewport(gameRenderer, &menu_screen );
+			
+
 			if(gameRenderer == NULL){
 				cout<<"renderer could not be created";
 			}
@@ -322,37 +326,49 @@ int main(int argc, char* args[]){
 			bool quit = false;
 			SDL_Event e;
 			int ct=0;
-			
+			Mix_PlayMusic( gMusic, -1 );			
 			while(!quit){
 				while(SDL_PollEvent(&e)!=0){					
 					if(e.type == SDL_QUIT){
 						quit = true;
 					}
 					else{
-						if(!BYPASS){
-							if(e.type == SDL_KEYDOWN && e.key.repeat==0){
+						if(e.type == SDL_KEYDOWN && e.key.repeat==0){
+							if(!PAUSE && !BYPASS){
 								player->handleMovement(e);
+							}
 
-								if(e.key.keysym.sym == SDLK_1){
-									Mix_PlayChannel(-1, gHigh, 0);
+							if(e.key.keysym.sym == SDLK_1){
+								Mix_PlayChannel(-1, gHigh, 0);
+							}
+							if(e.key.keysym.sym == SDLK_9){
+								Mix_PlayMusic( gMusic, -1 );
+							}
+							if(e.key.keysym.sym == SDLK_ESCAPE){
+								if(PAUSE){
+									PAUSE = false;
 								}
-								if(e.key.keysym.sym == SDLK_9){
-									Mix_PlayMusic( gMusic, -1 );
+								else{
+									PAUSE = true;
+									// SDL_RenderCopy( gameRenderer, PlayerSheetTexture, NULL, NULL);
 								}
 							}
-							else{
-								if(e.type == SDL_KEYUP){
+						}
+						else{
+							if(e.type == SDL_KEYUP){
+								if(!PAUSE && !BYPASS){
 									player->handleMovement(e,1);
 								}
 							}
 						}
-						
 					}
 				}
 
-				update_world(player);
-
-				c_detector.checkCollision(object);
+				if(!PAUSE){
+					update_world(player);
+					c_detector.checkCollision(object);
+				}
+				
 
 				// setRenderingClip();
 

@@ -25,5 +25,6 @@ extern const double SECOND;
 extern const double EPSILON;
 extern const double SCALE;
 extern bool BYPASS;
+extern bool PAUSE;
 extern vector<GameObj*> object;
 #endif
