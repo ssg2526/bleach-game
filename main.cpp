@@ -305,8 +305,8 @@ void update_world(Player* player){
 int main(int argc, char* args[]){
 	
 	Player* player = new Player(200, 400, 1, "player");
-	Enemy* e1 = new Enemy(950 ,250, -1, "e1");
-	Enemy* e2 = new Enemy(600 ,250, -1, "e1");
+	Enemy* e1 = new Enemy(1000 ,250, -1, "e1");
+	Enemy* e2 = new Enemy(800 ,250, -1, "e1");
 	CollisionDetector c_detector;
 	initiate_tiles();
 	object.push_back(e1);
